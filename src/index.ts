@@ -19,6 +19,7 @@
  */
 
 import type { Context } from '@deepseek-ai/cordis'
+import Schema from '@deepseek-ai/schemastery'
 
 /** Cordis plugin name. */
 export const name = 'aris'
@@ -37,10 +38,12 @@ export interface Config {
   live2dEnabled: boolean
 }
 
-/** Schemastery-style config object (plain shape for the loader). */
-export const Config = {
-  live2dEnabled: false,
-}
+/** 插件配置 schema，供 Cordis loader 做校验与默认值注入。 */
+export const Config = Schema.object({
+  live2dEnabled: Schema.boolean().default(false).description(
+    '是否启用预留的 live2d 头像层；当前仅作为稳定的占位配置项。',
+  ),
+})
 
 /**
  * Register the Aris host contribution. Currently a no-op reserved for the
