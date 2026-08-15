@@ -24,9 +24,10 @@
 # 作为插件装入 profile
 dsh plugin --profile <name> add link:<本仓库路径>
 
-# 用 preset「勇者爱丽丝」
-# 把 preset/aris 链接到用户预设目录（<repo-path> 替换为本仓库路径）
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\.agent-presets\aris" -Target "<repo-path>\preset\aris"
+# 用 preset「勇者爱丽丝」（<repo-path> 替换为本仓库路径）
+# 注意：必须复制而非链接 —— Windows Junction 对 agent-presets 发现不可见
+# （Dirent.isDirectory() 对 junction 返回 false），链接的 preset 不会出现在列表
+Copy-Item "<repo-path>\preset\aris" "$env:USERPROFILE\.dsh\.agent-presets\aris" -Recurse -Force
 ```
 
 依赖：`@aimercat/dsh-memory`（工作区记忆，需同时安装）。
