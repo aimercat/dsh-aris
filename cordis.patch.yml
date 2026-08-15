@@ -1,0 +1,9 @@
+# One package: the Aris partner-agent plugin. Install it into a dsh profile
+# (`dsh plugin --profile <name> add link:...`), then use the bundled preset
+# `preset/aris/` (记忆模式-style composition referencing @aimercat/dsh-aris,
+# dsh-memory, and the standard toolset). The patch row below mounts the host
+# half; the persona lives in the preset.
+
+- insert:
+    - id: dsh-aris
+      name: '@aimercat/dsh-aris'
