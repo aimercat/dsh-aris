@@ -64,7 +64,18 @@ export type ArisLive2DSettingsCardProps =
 
 export function ArisLive2DSettingsCard(props: ArisLive2DSettingsCardProps) {
   const [open, setOpen] = useState(false)
-  const state = props.useArisLive2DSettingsCard(snapshot => snapshot)
+  const useCard = (props as ArisLive2DSettingsCardProps & { useArisLive2DSettingsCard?: (selector: (value: ArisLive2DSettingsCardState) => ArisLive2DSettingsCardState) => ArisLive2DSettingsCardState }).useArisLive2DSettingsCard
+  if (typeof useCard !== 'function') {
+    return (
+      <li className="aris-settings-card is-open">
+        <div className="aris-settings-card__body">
+          <p className="aris-settings-card__label">爱丽丝 Live2D 设置卡注入失败</p>
+          <p className="aris-settings-card__hint">slot 已渲染，但 useArisLive2DSettingsCard hook 未注入到组件 props。</p>
+        </div>
+      </li>
+    )
+  }
+  const state = useCard(snapshot => snapshot)
   const blocked = !state.dirty || state.invalid || state.saving
 
   return (
