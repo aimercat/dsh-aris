@@ -38,6 +38,8 @@
 
 如果你的模型文件由本地静态服务提供，也可以使用可访问 URL，而不一定是 `file:///`。
 
+当前初版默认按 **Cubism 3/4 的 `model3.json` 路线** 处理，并会在浏览器侧自动加载 `live2dcubismcore.min.js`。如果你的模型是旧的 Cubism 2.1 `model.json` 路线，当前 MVP 不支持，且会在启动时要求 `live2d.min.js`。
+
 ## 如何安装主包
 
 ```powershell
@@ -98,6 +100,7 @@ Copy-Item "<repo-path>\packages\dsh-aris\preset\aris" "$env:USERPROFILE\.dsh\.ag
 ## 已知限制
 
 - 若 `live2dModelBase` 未配置或失效，`aris_avatar_control` 会降级为 `noop`
+- 当前实现仅支持 Cubism 3/4 模型；Cubism 2.1 的 `model.json` 线不在 MVP 范围内
 - 动作组 / 表情名取决于具体模型资源，当前默认语义映射只做了最保守的尝试
 - 不存在的 motion / expression 会被静默忽略，不会炸掉 GUI
 - 当前 overlay 拖拽是整个角色容器拖动，尚未区分单独拖拽手柄
