@@ -1,68 +1,21 @@
 {
-  "name": "@aimercat/dsh-aris",
-  "description": "Tendo Aris (天童爱丽丝) partner agent preset for DeepSeek Harness: the Millennium game-dev-club brave knight persona with emotional support, system-analysis mode, and optional workspace memory integration. A dedicated home for the persona's future live2d enhancements.",
-  "version": "0.1.0",
-  "type": "module",
+  "name": "dsh-aris-workspace",
+  "private": true,
   "packageManager": "pnpm@11.7.0",
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
   },
   "scripts": {
-    "build": "tsc -b && tsdown",
-    "test": "vitest run",
-    "typecheck": "tsc -b --pretty false",
-    "prepare": "tsdown"
+    "build": "pnpm --filter @aimercat/dsh-aris build",
+    "test": "pnpm --filter @aimercat/dsh-aris test",
+    "typecheck": "pnpm --filter @aimercat/dsh-aris typecheck"
   },
-  "main": "lib/index.js",
-  "types": "lib/types/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./lib/types/index.d.ts",
-      "default": "./lib/index.js"
-    },
-    "./client": {
-      "types": "./lib/types/client/index.d.ts",
-      "default": "./lib/client.js"
-    },
-    "./invariant": {
-      "types": "./lib/types/invariant.d.ts",
-      "default": "./lib/invariant.js"
-    },
-    "./src/*": "./src/*",
-    "./package.json": "./package.json"
+  "dependencies": {
+    "@aimercat/dsh-aris": "workspace:*"
   },
-  "files": [
-    "lib/**/*.js",
-    "lib/**/*.js.map",
-    "lib/**/*.d.ts",
-    "lib/**/*.d.ts.map",
-    "src",
-    "preset",
-    "cordis.patch.yml"
-  ],
-  "license": "MIT",
   "dsh": {
     "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
-    "client": {
-      "platform": "web"
+      "patch": "./packages/dsh-aris/cordis.patch.yml"
     }
-  },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1"
-  },
-  "devDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-client-runtime": "^0.1.0-rc.5",
-    "@deepseek-ai/schemastery": "3.18.1",
-    "@types/node": "^22.20.0",
-    "tsdown": "^0.22.2",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.8"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/aimercat/dsh-aris.git"
   }
 }

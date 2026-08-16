@@ -12,7 +12,7 @@ import { defineConfig } from 'tsdown'
 export default defineConfig([
   {
     name: '@aimercat/dsh-aris',
-    entry: ['src/index.ts', 'src/invariant.ts'],
+    entry: ['src/index.ts', 'src/invariant.ts', 'src/brave-permission.ts'],
     outDir: 'lib',
     format: ['esm'],
     platform: 'node',
@@ -33,7 +33,10 @@ export default defineConfig([
     dts: false,
     sourcemap: true,
     clean: false,
-    external: ['@deepseek-ai/cordis'],
+    deps: {
+      alwaysBundle: ['pixi.js', '@jannchie/pixi-live2d-display'],
+      neverBundle: ['@deepseek-ai/cordis'],
+    },
     define: {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),
       'import.meta.env.MODE': JSON.stringify(process.env.NODE_ENV ?? 'production'),
@@ -41,6 +44,7 @@ export default defineConfig([
     },
     outputOptions: {
       entryFileNames: 'client.js',
+      inlineDynamicImports: true,
       banner: 'window.__ModuleLoader__.load({ id: "@aimercat/dsh-aris", factory: (require) => {',
       footer: 'return module.exports; } });',
       intro: 'var module = { exports: {} }; var exports = module.exports;',

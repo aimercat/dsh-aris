@@ -1,24 +1,12 @@
 /**
- * Aris thinking-display styles — injected as one <style> tag only while the
- * active session runs the `aris` preset, removed on disable so other presets
- * stay untouched.
+ * Aris browser-half styles — injected as one <style> tag only while the
+ * active session runs the `aris` preset.
  *
- * Anchoring: the reasoning block is rendered by the official ReasoningRow
- * component (ui-conversation). Its CSS-Module class names are hashed and
- * unstable, so every rule selects through the stable `data-variant="think"`
- * attribute and substring class matches ([class*="title"] etc.). The "Think"
- * disclosure title is replaced via the visibility + ::after trick because a
- * plain textContent patch would be reverted by React reconciliation; the
- * pseudo-element text React never sees.
  * @module aris-think/styles
  */
 
 export const STYLE_TAG_ID = 'aris-think-css'
-
-/** Sectionized body: marker attribute set after folding. */
 export const SECTION_ATTR = 'data-aris-sectionized'
-
-/** One paragraph fold, appended into the think body. */
 export const SECTION_CLASS = 'aris-think-section'
 
 export const CSS = `
@@ -26,8 +14,6 @@ export const CSS = `
 [data-variant="think"] [class*="title"] {
   visibility: hidden;
   position: relative;
-  /* Room for the longer replacement title so it never overflows onto the
-     disclosure summary beside it. */
   min-width: 8.5em;
 }
 [data-variant="think"] [class*="title"]::after {
@@ -90,5 +76,77 @@ export const CSS = `
 .${SECTION_CLASS}-body {
   padding: 2px 12px 10px;
   white-space: pre-wrap;
+}
+
+/* ── live2d overlay ─────────────────────────────────────────────────────── */
+[data-dsh-aris-live2d] {
+  position: fixed;
+  z-index: 40;
+  width: 320px;
+  height: 420px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transform-origin: left top;
+  transform: scale(var(--aris-live2d-scale, 1));
+}
+[data-dsh-aris-live2d][data-hidden="1"] {
+  width: auto;
+  height: auto;
+}
+[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-stage,
+[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-bubble {
+  display: none;
+}
+.aris-live2d-stage {
+  width: 320px;
+  height: 420px;
+  pointer-events: auto;
+}
+.aris-live2d-stage canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.aris-live2d-toggle {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(116, 181, 255, 0.4);
+  background: rgba(9, 17, 30, 0.68);
+  color: #9fd0ff;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+.aris-live2d-bubble {
+  position: absolute;
+  right: 18px;
+  top: 38px;
+  max-width: 220px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(9, 17, 30, 0.9);
+  color: #eef6ff;
+  border: 1px solid rgba(116, 181, 255, 0.35);
+  font-size: 12px;
+  line-height: 1.45;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+}
+.aris-live2d-bubble[data-tone="happy"] {
+  border-color: rgba(94, 230, 180, 0.45);
+}
+.aris-live2d-bubble[data-tone="warning"] {
+  border-color: rgba(255, 166, 87, 0.55);
+}
+.aris-live2d-bubble[data-tone="thinking"] {
+  border-color: rgba(132, 170, 255, 0.5);
+}
+.aris-live2d-bubble[data-tone="victory"] {
+  border-color: rgba(255, 223, 107, 0.55);
 }
 `

@@ -1,0 +1,37 @@
+# One package: the Aris partner-agent plugin. Install it into a dsh profile
+# (`dsh plugin --profile <name> add link:...`), then use the bundled preset
+# `preset/aris/` (记忆模式-style composition referencing @aimercat/dsh-aris,
+# dsh-memory, and the standard toolset). The patch rows below mount the host
+# halves; the persona lives in the preset.
+#
+# The first row restates the official permission preset table (Cordis replaces
+# row configs rather than deep-merging them) and inserts the fourth档位
+# `brave` — 「勇者权限」: Full-access execution range (sandbox open so the
+# brave domain can extend beyond the workspace) with per-call deterministic
+# policy (hard denies / brave-domain fast path / deletion protection / asks).
+# The policy plugin `brave-permission-mode` (same package, sub-path entry)
+# stays inactive unless a session actually selects the `brave` preset.
+
+- id: permission
+  config:
+    presets:
+      read-only:
+        sandbox: read-only
+        approval: ask
+      workspace-write:
+        sandbox: workspace-write
+        approval: ask
+      brave:
+        sandbox: danger-full-access
+        approval: ask
+        name: 勇者权限
+        description: 爱丽丝的勇者领域：工作区与配置的冒险领域内自动放行读写与构建测试；删除既有数据需确认；领域外删除与危险操作被拒绝。
+      danger-full-access:
+        sandbox: danger-full-access
+        approval: never
+
+- insert:
+    - id: dsh-aris
+      name: '@aimercat/dsh-aris'
+    - id: brave-permission-mode
+      name: '@aimercat/dsh-aris/brave-permission'
