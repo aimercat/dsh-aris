@@ -14,12 +14,14 @@ function sessionList(ctx: ClientContext): ObservableSnapshot<{ current: SessionI
 }
 
 export function createLive2DBridge(ctx: ClientContext, config: Partial<ArisConfig> = {}): { sync: (enabled: boolean) => void; stop: () => void } {
+  let active = false
   let currentSessionId: SessionId | undefined
   let localState: Live2DLocalState | undefined
   let overlay: ReturnType<typeof createOverlay> | undefined
   let runtime: Live2DAvatarRuntime | undefined
   let disposeProjection: (() => void) | undefined
   let disposeSession: (() => void) | undefined
+  let retryTimer: number | undefined
   let lastIntentId: string | undefined
   let lastRunning = false
   let lastError: string | null = null
@@ -38,6 +40,10 @@ export function createLive2DBridge(ctx: ClientContext, config: Partial<ArisConfi
     overlay?.destroy()
     overlay = undefined
     currentSessionId = undefined
+    if (retryTimer !== undefined) {
+      window.clearTimeout(retryTimer)
+      retryTimer = undefined
+    }
     lastIntentId = undefined
     lastRunning = false
     lastError = null
@@ -45,7 +51,15 @@ export function createLive2DBridge(ctx: ClientContext, config: Partial<ArisConfi
 
   const bindSession = (sessionId: SessionId): void => {
     const binding = sessionsPort(ctx).binding(sessionId)
-    if (binding === undefined) return
+    if (binding === undefined) {
+      if (retryTimer === undefined) {
+        retryTimer = window.setTimeout(() => {
+          retryTimer = undefined
+          if (active) controller.sync(true)
+        }, 150)
+      }
+      return
+    }
     currentSessionId = sessionId
     localState = loadState(config.live2dAnchor ?? 'bottom-right')
     overlay = createOverlay(document, localState, (next) => {
@@ -93,9 +107,9 @@ export function createLive2DBridge(ctx: ClientContext, config: Partial<ArisConfi
     disposeSession = binding.session.subscribe(sessionSync)
   }
 
-  return {
-    sync(enabled) {
-      const active = enabled && canRender
+  const controller = {
+    sync(enabled: boolean) {
+      active = enabled && canRender
       const sessionId = sessionList(ctx).getSnapshot().current
       if (!active || sessionId === undefined) {
         teardownSession()
@@ -106,7 +120,10 @@ export function createLive2DBridge(ctx: ClientContext, config: Partial<ArisConfi
       bindSession(sessionId)
     },
     stop() {
+      active = false
       teardownSession()
     },
   }
+
+  return controller
 }

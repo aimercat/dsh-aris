@@ -89,6 +89,8 @@ export const CSS = `
   user-select: none;
   transform-origin: left top;
   transform: scale(var(--aris-live2d-scale, 1));
+  border-radius: 12px;
+  outline: 1px solid rgba(93, 162, 255, 0.22);
 }
 [data-dsh-aris-live2d][data-hidden="1"] {
   width: auto;
@@ -102,6 +104,14 @@ export const CSS = `
   width: 320px;
   height: 420px;
   pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: rgba(159, 208, 255, 0.85);
+  font-size: 12px;
+  border-radius: 12px;
+  background: radial-gradient(circle at top, rgba(70, 128, 214, 0.08), rgba(9, 17, 30, 0.05));
 }
 .aris-live2d-stage canvas {
   width: 100%;

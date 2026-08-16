@@ -32,6 +32,7 @@ export function createOverlay(doc: Document, initialState: Live2DLocalState, onS
 
   const stage = doc.createElement('div')
   stage.className = STAGE_CLASS
+  stage.textContent = 'Aris Live2D booting…'
 
   const bubble = doc.createElement('div')
   bubble.className = BUBBLE_CLASS
