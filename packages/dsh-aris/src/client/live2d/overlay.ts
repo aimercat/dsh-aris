@@ -1,4 +1,5 @@
 import type { Live2DLocalState } from './state.ts'
+import { normalizeState } from './state.ts'
 
 export const ROOT_ID = 'dsh-aris-live2d-root'
 export const ROOT_ATTR = 'data-dsh-aris-live2d'
@@ -28,13 +29,11 @@ export function createOverlay(doc: Document, initialState: Live2DLocalState, onS
   toggle.className = TOGGLE_CLASS
   toggle.type = 'button'
   toggle.title = '显示/隐藏爱丽丝'
-  toggle.textContent = initialState.hidden ? '◉' : '×'
 
   const stage = doc.createElement('div')
   stage.className = STAGE_CLASS
   stage.setAttribute('data-stage-state', 'booting')
-  stage.textContent = 'Aris Live2D booting…'
-  stage.textContent = 'Aris Live2D booting…'
+  stage.textContent = 'Aris Live2D booting...'
 
   const bubble = doc.createElement('div')
   bubble.className = BUBBLE_CLASS
@@ -43,7 +42,7 @@ export function createOverlay(doc: Document, initialState: Live2DLocalState, onS
   root.append(toggle, bubble, stage)
   doc.body.appendChild(root)
 
-  let state = { ...initialState }
+  let state = normalizeState(initialState, initialState.anchor)
   let dragging = false
   let dragOffsetX = 0
   let dragOffsetY = 0
@@ -57,30 +56,10 @@ export function createOverlay(doc: Document, initialState: Live2DLocalState, onS
   }
 
   const commit = (): void => {
+    state = normalizeState(state, state.anchor)
     onState({ ...state })
     apply()
   }
-
-  toggle.addEventListener('click', (event) => {
-    event.stopPropagation()
-    state.hidden = !state.hidden
-    commit()
-  })
-
-  root.addEventListener('pointerdown', (event) => {
-    if ((event.target as Element | null)?.closest(`.${TOGGLE_CLASS}`) !== null) return
-    dragging = true
-    dragOffsetX = event.clientX - state.left
-    dragOffsetY = event.clientY - state.top
-    root.setPointerCapture(event.pointerId)
-  })
-
-  root.addEventListener('pointermove', (event) => {
-    if (!dragging) return
-    state.left = Math.max(12, event.clientX - dragOffsetX)
-    state.top = Math.max(12, event.clientY - dragOffsetY)
-    apply()
-  })
 
   const finishDrag = (): void => {
     if (!dragging) return
@@ -88,8 +67,54 @@ export function createOverlay(doc: Document, initialState: Live2DLocalState, onS
     commit()
   }
 
+  const onToggleClick = (event: MouseEvent): void => {
+    event.stopPropagation()
+    state.hidden = !state.hidden
+    commit()
+  }
+
+  const onPointerDown = (event: PointerEvent): void => {
+    if ((event.target as Element | null)?.closest(`.${TOGGLE_CLASS}`) !== null) return
+    dragging = true
+    dragOffsetX = event.clientX - state.left
+    dragOffsetY = event.clientY - state.top
+    root.setPointerCapture(event.pointerId)
+  }
+
+  const onPointerMove = (event: PointerEvent): void => {
+    if (!dragging) return
+    state = normalizeState({
+      ...state,
+      left: event.clientX - dragOffsetX,
+      top: event.clientY - dragOffsetY,
+    }, state.anchor)
+    apply()
+  }
+
+  const onViewportChange = (): void => {
+    const next = normalizeState(state, state.anchor)
+    if (
+      next.left === state.left &&
+      next.top === state.top &&
+      next.scale === state.scale &&
+      next.hidden === state.hidden &&
+      next.anchor === state.anchor
+    ) {
+      apply()
+      return
+    }
+    state = next
+    commit()
+  }
+
+  toggle.addEventListener('click', onToggleClick)
+  root.addEventListener('pointerdown', onPointerDown)
+  root.addEventListener('pointermove', onPointerMove)
   root.addEventListener('pointerup', finishDrag)
   root.addEventListener('pointercancel', finishDrag)
+  root.addEventListener('lostpointercapture', finishDrag)
+  window.addEventListener('resize', onViewportChange)
+  window.visualViewport?.addEventListener('resize', onViewportChange)
 
   apply()
 
@@ -99,7 +124,7 @@ export function createOverlay(doc: Document, initialState: Live2DLocalState, onS
     bubble,
     toggle,
     setState(next) {
-      state = { ...next }
+      state = normalizeState(next, next.anchor)
       apply()
     },
     setBubble(text, tone) {
@@ -115,6 +140,14 @@ export function createOverlay(doc: Document, initialState: Live2DLocalState, onS
       else bubble.removeAttribute('data-tone')
     },
     destroy() {
+      toggle.removeEventListener('click', onToggleClick)
+      root.removeEventListener('pointerdown', onPointerDown)
+      root.removeEventListener('pointermove', onPointerMove)
+      root.removeEventListener('pointerup', finishDrag)
+      root.removeEventListener('pointercancel', finishDrag)
+      root.removeEventListener('lostpointercapture', finishDrag)
+      window.removeEventListener('resize', onViewportChange)
+      window.visualViewport?.removeEventListener('resize', onViewportChange)
       root.remove()
     },
   }

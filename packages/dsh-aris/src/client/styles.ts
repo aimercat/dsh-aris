@@ -10,7 +10,7 @@ export const SECTION_ATTR = 'data-aris-sectionized'
 export const SECTION_CLASS = 'aris-think-section'
 
 export const CSS = `
-/* ── title: 「Think」→「爱丽丝的思考回路」 ─────────────────────────────── */
+/* -- title: "Think" -> "爱丽丝的思考回路" ----------------------------- */
 [data-variant="think"] [class*="title"] {
   visibility: hidden;
   position: relative;
@@ -29,7 +29,7 @@ export const CSS = `
   pointer-events: none;
 }
 
-/* ── typewriter caret on the streaming summary ──────────────────────────── */
+/* -- typewriter caret on the streaming summary --------------------------- */
 [data-variant="think"][data-state="running"] [class*="summary"]::after {
   content: '▍';
   margin-left: 2px;
@@ -40,7 +40,7 @@ export const CSS = `
   to { visibility: hidden; }
 }
 
-/* ── sectionized (folded) thinking body ─────────────────────────────────── */
+/* -- sectionized (folded) thinking body --------------------------------- */
 .${SECTION_CLASS} {
   margin: 4px 0;
   border-radius: 8px;
@@ -78,7 +78,7 @@ export const CSS = `
   white-space: pre-wrap;
 }
 
-/* ── live2d overlay ─────────────────────────────────────────────────────── */
+/* -- live2d overlay ------------------------------------------------------ */
 [data-dsh-aris-live2d] {
   position: fixed;
   z-index: 40;
@@ -93,8 +93,10 @@ export const CSS = `
   outline: 1px solid rgba(93, 162, 255, 0.22);
 }
 [data-dsh-aris-live2d][data-hidden="1"] {
-  width: auto;
-  height: auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  outline: none;
 }
 [data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-stage,
 [data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-bubble {
@@ -128,7 +130,7 @@ export const CSS = `
 .aris-live2d-toggle {
   position: absolute;
   top: 6px;
-  right: 6px;
+  left: 6px;
   z-index: 2;
   width: 22px;
   height: 22px;

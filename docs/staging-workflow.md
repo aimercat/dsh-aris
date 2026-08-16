@@ -1,204 +1,105 @@
-# DSH 插件 Staging 工作流
+# dsh-aris Staging Workflow
 
 ## 目标
 
-在不引入 Docker 的前提下，把“开发中的插件改动”与“老师真实日用环境”隔离开。
+`dsh_aris_agent` 现在只维护爱丽丝专用的 `aris-dev` 薄包装入口，不再在仓库内重复维护通用开发隔离模板。
 
-这份流程以 `dsh-aris` 为例，但目录和命名规则可以推广到后续所有插件。
+通用实现与完整模板文档的 source of truth 已迁到独立仓库：
 
-## 为什么当前不优先 Docker
+- 本地模板仓库：`G:\CodeRep\dsh-plugin-dev-template`
+- GitHub：`https://github.com/aimercat/dsh-plugin-dev-template`
+- 完整模板文档：`G:\CodeRep\dsh-plugin-dev-template\docs\plugin-dev-template.md`
 
-当前主要问题不是后端进程环境一致性，而是：
+本文件只记录爱丽丝仓库自己的默认参数与入口习惯。
 
-- DSH profile 会直接吃本地插件目录
-- preset 复制与 bundle 安装是本机用户目录状态
-- GUI / client plugin 的成败依赖真实桌面宿主与本地配置
+## 本仓库保留的入口
 
-因此，当前性价比最高的隔离方式不是容器，而是：
+- `scripts/setup-aris-dev.cmd` / `.ps1`
+- `scripts/start-aris-dev.cmd`
+- `scripts/sync-aris-dev.cmd` / `.ps1`
+- `scripts/verify-aris-dev.cmd` / `.ps1`
+- `scripts/promote-aris-dev.cmd` / `.ps1`
 
-- 稳定副本
-- DevRep 开发副本
-- dev profile
-- dev preset
+这些脚本内部都会转发到模板仓库的 `scripts/*-plugin-dev.*`，但会固定爱丽丝默认值：
 
-## 推荐目录结构
+- `PluginPackageName`: `@aimercat/dsh-aris`
+- `PluginPackagePath`: `packages\dsh-aris`
+- `PresetSourcePath`: `packages\dsh-aris\preset\aris`
+- `DevRepoName`: `dsh_aris_agent`
+- `DevBranch`: `dev/aris`
+- `DevProfile`: `aris-dev`
+- `DevPresetId`: `aris-dev`
+- `DevPresetDisplayName`: `勇者爱丽丝（Dev）`
+- `DevRoot`: `G:\CodeRep\DevRep`
+- `DevDshHome`: `C:\Users\Duang\.dsh-dev`
+- `DevPort`: `3081`
 
-### 稳定副本
+如果模板仓库不在默认位置，可以先设置：
 
-```text
-G:\CodeRep\dsh_aris_agent
+```powershell
+$env:DSH_PLUGIN_DEV_TEMPLATE_REPO = 'G:\CodeRep\dsh-plugin-dev-template'
 ```
 
-### 开发副本
+批处理入口也会读取同名环境变量；未设置时默认回落到上面的路径。
 
-```text
-G:\CodeRep\DevRep\dsh_aris_agent
-```
+## 一次性准备
 
-后续其它插件也统一放在：
-
-```text
-G:\CodeRep\DevRep\<plugin-name>
-```
-
-## 推荐命名
-
-### Profile
-
-- 日常：`aris-main`
-- 开发：`aris-dev`
-
-### Preset
-
-- 日常：`aris`
-- 开发：`aris-dev`
-
-开发 preset 建议显示名改成 `勇者爱丽丝（Dev）`，避免 GUI 中误选。若插件内部存在按 preset id 启用的逻辑（如 Aris 的 thinking / Live2D gate），也必须显式把 `aris-dev` 视为受支持的 preset id，而不能只硬编码 `aris`。
-
-## 爱丽丝插件的落地实践
-
-### 一次性准备
-
-在稳定仓库根目录执行：
+在仓库根目录执行：
 
 ```bat
 scripts\setup-aris-dev.cmd
 ```
 
-如果你明确在 PowerShell 里执行，也可以用：
+如果要打开 Live2D dev 配置，可继续沿用爱丽丝专用参数：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup-aris-dev.ps1
+pwsh -NoProfile -File .\scripts\setup-aris-dev.ps1 -EnableLive2D -Live2DModelBase "<model-base-url>"
 ```
 
-这会做四件事：
+其中 Live2D 相关 patch 会由 `setup-aris-dev.ps1` 临时生成，再交给模板仓库的 `setup-plugin-dev.ps1` 追加到 dev profile。
 
-1. 在 `G:\CodeRep\DevRep\dsh_aris_agent` 建 dev worktree
-2. 创建/复用开发分支 `dev/aris`
-3. 把 preset 复制成 `~/.dsh/.agent-presets/aris-dev`，并改名为 `勇者爱丽丝（Dev）`
-4. 以 `web` profile 为模板，生成 `aris-dev` profile 的 package.json / cordis.patch.yml，并把 `@aimercat/dsh-aris` 改指向 DevRep 开发副本
+## 日常循环
 
-默认 profile 名是 `aris-dev`。如果你改名了，可以传参：
-
-```bat
-scripts\setup-aris-dev.cmd -DevProfile my-aris-dev
-```
-
-### 日常开发
-
-1. 在稳定副本里先做实验性修改，或在开发副本里直接改代码。
-
-稳定副本当前如果已经有大量未提交改动，需要先把当前工作树快照同步到开发副本：
+1. 同步当前工作树快照到开发副本：
 
 ```bat
 scripts\sync-aris-dev.cmd
 ```
 
-这一步是必要的，因为 `git worktree` 只带走 `HEAD` 已提交内容，不会自动带走你当前工作区里的未提交改动。换句话说：不先 `sync`，DevRep 里测到的很可能还是旧版本。
+2. 在开发副本 `G:\CodeRep\DevRep\dsh_aris_agent` 内继续改动，或先在稳定副本试验后再同步。
 
-2. 在开发副本里继续改代码：
-
-```text
-G:\CodeRep\DevRep\dsh_aris_agent
-```
-
-3. 改完先跑预检：
+3. 跑预检：
 
 ```bat
 scripts\verify-aris-dev.cmd
 ```
 
-它会依次执行：
+4. 启动独立 dev 环境：
 
-- `pnpm install`
-- `pnpm typecheck`
-- `pnpm build`
-- `pnpm test`
-
-并额外检查：
-
-- 根 `package.json` 是否仍有 `dsh.bundle.patch`
-- `packages/dsh-aris/package.json` 是否仍有 `dsh.client.platform = web`
-- `packages/dsh-aris/lib/client.js` 是否已是单文件（没有 `require("./*.cjs")`）
-
-3. 只在 `aris-dev` profile + `勇者爱丽丝（Dev）` preset 里做 GUI 验收
-
-推荐启动命令：
-
-```powershell
-dsh --profile aris-dev --port 3081
+```bat
+scripts\start-aris-dev.cmd
 ```
 
-然后在浏览器打开：
+然后在浏览器打开 `http://127.0.0.1:3081`，选择 `勇者爱丽丝（Dev）`。
 
-```text
-http://127.0.0.1:3081
-```
-
-### Promote 到稳定副本
-
-当开发副本验证通过后，在稳定仓库根目录执行：
+5. 验收通过后做 promote：
 
 ```bat
 scripts\promote-aris-dev.cmd
 ```
 
-默认是 dry-run，只打印即将执行的 git 命令。
-
-真正执行 fast-forward promote：
+真正执行 fast-forward merge：
 
 ```bat
 scripts\promote-aris-dev.cmd -Execute
 ```
 
-默认约定：
+## 规则
 
-- dev branch: `dev/aris`
-- stable branch: `main`
+1. 日常 profile 不直连 DevRep 开发副本。
+2. 预检不过，不进 dev GUI 验收。
+3. dev GUI 验收不过，不 promote 到稳定分支。
 
-如果你的默认分支不是 `main`，可以显式传：
+## 说明
 
-```powershell
-.\scripts\promote-aris-dev.ps1 -StableBranch master -Execute
-```
-
-## 三条硬规则
-
-1. **真实日用 profile 不要直连 DevRep 开发副本**
-2. **预检不过，不进 dev GUI 验收**
-3. **dev GUI 验收不过，不 promote 到稳定副本**
-
-## 可选增强：独立 DSH home
-
-如果后面插件越来越多，建议再加一层：
-
-- 日常：`~/.dsh`
-- 开发：`~/.dsh-dev`
-
-这样可以把 profile、preset、插件安装记录进一步隔离。
-
-当前阶段可以先不做，等你发现 `aris-dev` profile 仍会和日常环境互相影响时，再补这层。
-
-## 适用范围
-
-这套工作流不只适用于 `dsh-aris`，后续所有插件都能复用：
-
-- `dsh-task-board`
-- `dsh-ssh`
-- `dsh-aionui-panel`
-- 以及后续的 `dsh-aris-live2d`
-
-统一的收益是：
-
-- 开发目录固定
-- dev profile 命名固定
-- promote 习惯固定
-- 出问题时不需要临时救火真实环境
-
-## 最终建议
-
-当前阶段最稳的路线不是 Docker，而是：
-
-- **稳定副本 + DevRep 开发副本 + dev profile + dev preset**
-
-对爱丽丝插件来说，这已经足够把“改坏了导致本地真实环境启动不了”的风险压到很低。
+如果需要调整通用隔离能力，不在本仓库继续扩展 `plugin-dev` 模板；应优先回流到 `dsh-plugin-dev-template`，再让爱丽丝薄包装跟随更新。

@@ -83,6 +83,7 @@ export class Live2DAvatarRuntime {
   private model: RuntimeModel | undefined
   private bubbleTimer: number | undefined
   private destroyed = false
+  private pointerMoveHandler: ((event: PointerEvent) => void) | undefined
 
   constructor(overlay: Live2DOverlay, config: Live2DRuntimeConfig) {
     this.overlay = overlay
@@ -104,8 +105,13 @@ export class Live2DAvatarRuntime {
       preference: 'webgl',
       sharedTicker: true,
     })
+    if (this.destroyed) {
+      this.safeDestroyApp(app)
+      return
+    }
+
     this.overlay.stage.setAttribute('data-stage-state', 'core-ready')
-    this.overlay.stage.textContent = 'Aris Live2D loading model…'
+    this.overlay.stage.textContent = 'Aris Live2D loading model...'
     this.overlay.stage.replaceChildren(app.canvas)
     this.app = app
 
@@ -116,10 +122,13 @@ export class Live2DAvatarRuntime {
       autoUpdate: true,
       ticker: Ticker.shared,
     }) as RuntimeModel
+
     if (this.destroyed) {
-      app.destroy(true)
+      if (this.app === app) this.app = undefined
+      this.safeDestroyApp(app)
       return
     }
+
     this.model = model
     this.overlay.stage.setAttribute('data-stage-state', 'ready')
     model.anchor.set(0.5, 1)
@@ -127,6 +136,15 @@ export class Live2DAvatarRuntime {
     this.fitModel(this.config.scale)
     this.attachPointerTracking()
     await this.performSemantic('greeting')
+  }
+
+  private safeDestroyApp(app: Application): void {
+    try {
+      app.destroy()
+    } catch (error) {
+      console.warn('[dsh-aris] live2d app destroy failed:', error)
+      app.canvas.remove()
+    }
   }
 
   private fitModel(scale: number): void {
@@ -141,15 +159,15 @@ export class Live2DAvatarRuntime {
   }
 
   private attachPointerTracking(): void {
-    if (!this.config.followPointer || this.model === undefined || this.app === undefined) return
-    const onMove = (event: PointerEvent): void => {
+    if (!this.config.followPointer || this.model === undefined || this.app === undefined || this.pointerMoveHandler !== undefined) return
+    this.pointerMoveHandler = (event: PointerEvent): void => {
       if (this.model === undefined || this.app === undefined) return
       const rect = this.app.canvas.getBoundingClientRect()
       const x = ((event.clientX - rect.left) / rect.width) * 2 - 1
       const y = ((event.clientY - rect.top) / rect.height) * 2 - 1
       this.model.focus(x, y, false)
     }
-    this.overlay.stage.addEventListener('pointermove', onMove)
+    this.overlay.stage.addEventListener('pointermove', this.pointerMoveHandler)
   }
 
   async applyIntent(intent: ArisAvatarIntent): Promise<void> {
@@ -198,11 +216,15 @@ export class Live2DAvatarRuntime {
   destroy(): void {
     this.destroyed = true
     if (this.bubbleTimer !== undefined) window.clearTimeout(this.bubbleTimer)
+    this.bubbleTimer = undefined
     this.overlay.setBubble(null, undefined)
-    if (this.app !== undefined) {
-      this.app.destroy(true, { children: true })
-      this.app = undefined
+    if (this.pointerMoveHandler !== undefined) {
+      this.overlay.stage.removeEventListener('pointermove', this.pointerMoveHandler)
+      this.pointerMoveHandler = undefined
     }
+    const app = this.app
+    this.app = undefined
     this.model = undefined
+    if (app !== undefined) this.safeDestroyApp(app)
   }
 }
