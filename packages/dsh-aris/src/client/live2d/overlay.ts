@@ -6,7 +6,6 @@ export const ROOT_ATTR = 'data-dsh-aris-live2d'
 export const STAGE_CLASS = 'aris-live2d-stage'
 export const BUBBLE_CLASS = 'aris-live2d-bubble'
 export const TOGGLE_CLASS = 'aris-live2d-toggle'
-export const MUTE_CLASS = 'aris-live2d-mute'
 export const RESET_CLASS = 'aris-live2d-reset'
 
 export interface Live2DOverlay {
@@ -14,7 +13,6 @@ export interface Live2DOverlay {
   readonly stage: HTMLDivElement
   readonly bubble: HTMLDivElement
   readonly toggle: HTMLButtonElement
-  readonly mute: HTMLButtonElement
   readonly reset: HTMLButtonElement
   setState(state: Live2DLocalState): void
   setBubble(text: string | null, tone: string | undefined): void
@@ -39,11 +37,6 @@ export function createOverlay(
   toggle.type = 'button'
   toggle.title = '显示/隐藏爱丽丝'
 
-  const mute = doc.createElement('button')
-  mute.className = MUTE_CLASS
-  mute.type = 'button'
-  mute.title = '静音/取消静音'
-
   const reset = doc.createElement('button')
   reset.className = RESET_CLASS
   reset.type = 'button'
@@ -59,13 +52,12 @@ export function createOverlay(
   bubble.className = BUBBLE_CLASS
   bubble.hidden = true
 
-  root.append(toggle, mute, reset, bubble, stage)
+  root.append(toggle, reset, bubble, stage)
   doc.body.appendChild(root)
 
   let state = normalizeState(initialState, initialState.anchor, {
     scale: initialState.scale,
     hidden: initialState.hidden,
-    muted: initialState.muted,
   })
   let dragging = false
   let dragOffsetX = 0
@@ -77,14 +69,12 @@ export function createOverlay(
     root.dataset.hidden = state.hidden ? '1' : '0'
     root.style.setProperty('--aris-live2d-scale', `${state.scale}`)
     toggle.textContent = state.hidden ? '◉' : '×'
-    mute.textContent = state.muted ? '🔇' : '🔊'
   }
 
   const commit = (): void => {
     state = normalizeState(state, state.anchor, {
       scale: state.scale,
       hidden: state.hidden,
-      muted: state.muted,
     })
     onState({ ...state })
     apply()
@@ -99,12 +89,6 @@ export function createOverlay(
   const onToggleClick = (event: MouseEvent): void => {
     event.stopPropagation()
     state.hidden = !state.hidden
-    commit()
-  }
-
-  const onMuteClick = (event: MouseEvent): void => {
-    event.stopPropagation()
-    state.muted = !state.muted
     commit()
   }
 
@@ -131,7 +115,6 @@ export function createOverlay(
     }, state.anchor, {
       scale: state.scale,
       hidden: state.hidden,
-      muted: state.muted,
     })
     apply()
   }
@@ -140,14 +123,12 @@ export function createOverlay(
     const next = normalizeState(state, state.anchor, {
       scale: state.scale,
       hidden: state.hidden,
-      muted: state.muted,
     })
     if (
       next.left === state.left &&
       next.top === state.top &&
       next.scale === state.scale &&
       next.hidden === state.hidden &&
-      next.muted === state.muted &&
       next.anchor === state.anchor
     ) {
       apply()
@@ -158,7 +139,6 @@ export function createOverlay(
   }
 
   toggle.addEventListener('click', onToggleClick)
-  mute.addEventListener('click', onMuteClick)
   reset.addEventListener('click', onResetClick)
   root.addEventListener('pointerdown', onPointerDown)
   root.addEventListener('pointermove', onPointerMove)
@@ -175,13 +155,11 @@ export function createOverlay(
     stage,
     bubble,
     toggle,
-    mute,
     reset,
     setState(next) {
       state = normalizeState(next, next.anchor, {
         scale: next.scale,
         hidden: next.hidden,
-        muted: next.muted,
       })
       apply()
     },
@@ -199,7 +177,6 @@ export function createOverlay(
     },
     destroy() {
       toggle.removeEventListener('click', onToggleClick)
-      mute.removeEventListener('click', onMuteClick)
       reset.removeEventListener('click', onResetClick)
       root.removeEventListener('pointerdown', onPointerDown)
       root.removeEventListener('pointermove', onPointerMove)

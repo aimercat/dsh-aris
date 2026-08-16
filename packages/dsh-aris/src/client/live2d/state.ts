@@ -10,7 +10,6 @@ export const VIEWPORT_PADDING = 12
 export interface Live2DStateDefaults {
   scale: number
   hidden: boolean
-  muted: boolean
 }
 
 export interface Live2DLocalState {
@@ -18,7 +17,6 @@ export interface Live2DLocalState {
   top: number
   scale: number
   hidden: boolean
-  muted: boolean
   anchor: ArisAvatarAnchor
 }
 
@@ -58,7 +56,6 @@ export function defaultState(anchor: ArisAvatarAnchor, defaults: Live2DStateDefa
     top,
     scale: defaults.scale,
     hidden: defaults.hidden,
-    muted: defaults.muted,
     anchor,
   }
 }
@@ -71,7 +68,6 @@ export function normalizeState(
   const fallback = defaultState(fallbackAnchor, defaults)
   const scale = clamp(candidate?.scale ?? fallback.scale, 0.45, 1.6)
   const hidden = candidate?.hidden ?? fallback.hidden
-  const muted = candidate?.muted ?? fallback.muted
   const anchor = candidate?.anchor ?? fallback.anchor
   const { width, height } = viewportSize()
   const size = footprint(scale, hidden)
@@ -83,7 +79,6 @@ export function normalizeState(
     top: clamp(candidate?.top ?? fallback.top, VIEWPORT_PADDING, maxTop),
     scale,
     hidden,
-    muted,
     anchor,
   }
 }

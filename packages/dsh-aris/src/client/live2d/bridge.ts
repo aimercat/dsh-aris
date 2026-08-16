@@ -78,12 +78,11 @@ export function createLive2DBridge(ctx: ClientContext): { sync: (enabled: boolea
       const stateDefaults: Live2DStateDefaults = {
         scale: value.scale,
         hidden: value.defaultHidden,
-        muted: value.muted,
       }
 
       if (overlay !== undefined || runtime !== undefined) {
         runtime?.setMotionSoundEnabled(value.allowMotionSound)
-        runtime?.setMuted(localState?.muted ?? value.muted)
+        runtime?.setMuted(value.muted)
         return
       }
 
@@ -92,14 +91,13 @@ export function createLive2DBridge(ctx: ClientContext): { sync: (enabled: boolea
         localState = next
         saveState(next)
         runtime?.setScale(next.scale)
-        runtime?.setMuted(next.muted)
       })
       runtime = new Live2DAvatarRuntime(overlay, {
         modelBase: value.modelBase,
         cubismCoreUrl: value.cubismCoreUrl,
         scale: localState.scale,
         followPointer: value.followPointer,
-        muted: localState.muted,
+        muted: value.muted,
         allowMotionSound: value.allowMotionSound,
       })
       void runtime.init().catch((error) => {

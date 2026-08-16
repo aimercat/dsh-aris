@@ -100,7 +100,6 @@ export const CSS = `
 }
 [data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-stage,
 [data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-bubble,
-[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-mute,
 [data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-reset {
   display: none;
 }
@@ -130,7 +129,6 @@ export const CSS = `
   display: block;
 }
 .aris-live2d-toggle,
-.aris-live2d-mute,
 .aris-live2d-reset {
   position: absolute;
   top: 6px;
@@ -148,11 +146,8 @@ export const CSS = `
 .aris-live2d-toggle {
   left: 6px;
 }
-.aris-live2d-mute {
-  left: 34px;
-}
 .aris-live2d-reset {
-  left: 62px;
+  left: 34px;
 }
 .aris-live2d-bubble {
   position: absolute;
