@@ -61,8 +61,14 @@ G:\CodeRep\DevRep\<plugin-name>
 
 在稳定仓库根目录执行：
 
+```bat
+scripts\setup-aris-dev.cmd
+```
+
+如果你明确在 PowerShell 里执行，也可以用：
+
 ```powershell
-.\scripts\setup-aris-dev.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-aris-dev.ps1
 ```
 
 这会做四件事：
@@ -74,8 +80,8 @@ G:\CodeRep\DevRep\<plugin-name>
 
 默认 profile 名是 `aris-dev`。如果你改名了，可以传参：
 
-```powershell
-.\scripts\setup-aris-dev.ps1 -DevProfile my-aris-dev
+```bat
+scripts\setup-aris-dev.cmd -DevProfile my-aris-dev
 ```
 
 ### 日常开发
@@ -84,8 +90,8 @@ G:\CodeRep\DevRep\<plugin-name>
 
 稳定副本当前如果已经有大量未提交改动，需要先把当前工作树快照同步到开发副本：
 
-```powershell
-.\scripts\sync-aris-dev.ps1
+```bat
+scripts\sync-aris-dev.cmd
 ```
 
 这一步是必要的，因为 `git worktree` 只带走 `HEAD` 已提交内容，不会自动带走你当前工作区里的未提交改动。换句话说：不先 `sync`，DevRep 里测到的很可能还是旧版本。
@@ -98,8 +104,8 @@ G:\CodeRep\DevRep\dsh_aris_agent
 
 3. 改完先跑预检：
 
-```powershell
-.\scripts\verify-aris-dev.ps1
+```bat
+scripts\verify-aris-dev.cmd
 ```
 
 它会依次执行：
@@ -133,16 +139,16 @@ http://127.0.0.1:3081
 
 当开发副本验证通过后，在稳定仓库根目录执行：
 
-```powershell
-.\scripts\promote-aris-dev.ps1
+```bat
+scripts\promote-aris-dev.cmd
 ```
 
 默认是 dry-run，只打印即将执行的 git 命令。
 
 真正执行 fast-forward promote：
 
-```powershell
-.\scripts\promote-aris-dev.ps1 -Execute
+```bat
+scripts\promote-aris-dev.cmd -Execute
 ```
 
 默认约定：

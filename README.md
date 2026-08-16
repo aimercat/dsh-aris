@@ -37,10 +37,10 @@ Copy-Item "<repo-path>\packages\dsh-aris\preset\aris" "$env:USERPROFILE\.dsh\.ag
 非 Docker 的 staging 工作流已以爱丽丝插件为例落地，见：
 
 - `docs/staging-workflow.md`
-- `scripts/setup-aris-dev.ps1`
-- `scripts/sync-aris-dev.ps1`
-- `scripts/verify-aris-dev.ps1`
-- `scripts/promote-aris-dev.ps1`
+- `scripts/setup-aris-dev.cmd` / `.ps1`
+- `scripts/sync-aris-dev.cmd` / `.ps1`
+- `scripts/verify-aris-dev.cmd` / `.ps1`
+- `scripts/promote-aris-dev.cmd` / `.ps1`
 
 当前约定所有插件的开发副本统一放在 `G:\CodeRep\DevRep`。
 推荐 dev 启动方式：`dsh --profile aris-dev --port 3081`

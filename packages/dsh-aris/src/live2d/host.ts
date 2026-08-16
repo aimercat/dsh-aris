@@ -4,9 +4,12 @@ import type { ProjectionDefinition } from '@deepseek-ai/dsh-session-projection'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import { z } from 'zod'
 import {
+  ARIS_AVATAR_CONFIG_PROJECTION_KEY,
   ARIS_AVATAR_EVENT,
   ARIS_AVATAR_PROJECTION_KEY,
   ARIS_AVATAR_VERSION,
+  type ArisAvatarClientConfig,
+  type ArisAvatarClientConfigValue,
   type ArisAvatarIntent,
   type ArisAvatarPriority,
   type ArisAvatarProjection,
@@ -45,6 +48,17 @@ const avatarProjectionSchema: z.ZodType<ArisAvatarProjection> = z.object({
       durationMs: z.number().int().positive().max(30000).optional(),
     }),
   ]),
+})
+
+const avatarClientConfigSchema: z.ZodType<ArisAvatarClientConfig> = z.object({
+  version: z.literal(ARIS_AVATAR_VERSION),
+  enabled: z.boolean(),
+  modelBase: z.string().min(1),
+  cubismCoreUrl: z.string().min(1),
+  anchor: z.enum(['bottom-right', 'bottom-left']),
+  scale: z.number().positive(),
+  draggable: z.boolean(),
+  followPointer: z.boolean(),
 })
 
 function renderToolResult(value: ArisAvatarToolResult): string {
@@ -108,9 +122,25 @@ function newIntentId(): string {
   return `aris-avatar-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 }
 
-export function registerArisAvatarProjection(ctx: Context): void {
+function buildClientConfig(config: Readonly<Config>): ArisAvatarClientConfigValue {
+  const modelBase = config.live2dModelBase.trim()
+  if (!config.live2dEnabled || modelBase === '') return null
+  return avatarClientConfigSchema.parse({
+    version: ARIS_AVATAR_VERSION,
+    enabled: true,
+    modelBase,
+    cubismCoreUrl: config.live2dCubismCoreUrl.trim(),
+    anchor: config.live2dAnchor,
+    scale: config.live2dScale,
+    draggable: config.live2dDraggable,
+    followPointer: config.live2dFollowPointer,
+  })
+}
+
+export function registerArisAvatarProjection(ctx: Context, config: Readonly<Config>): void {
+  const clientConfig = buildClientConfig(config)
   ctx.inject(['sessionProjections'], (projectionCtx) => {
-    const definition: ProjectionDefinition<typeof ARIS_AVATAR_PROJECTION_KEY, ArisAvatarProjectionValue> = {
+    const avatarDefinition: ProjectionDefinition<typeof ARIS_AVATAR_PROJECTION_KEY, ArisAvatarProjectionValue> = {
       key: ARIS_AVATAR_PROJECTION_KEY,
       schema: avatarProjectionSchema.nullable(),
       init: (): ArisAvatarProjectionValue => null,
@@ -121,7 +151,17 @@ export function registerArisAvatarProjection(ctx: Context): void {
       view: (state: ArisAvatarProjectionValue): ArisAvatarProjectionValue => state,
       stateVersion: 1,
     }
-    projectionCtx.sessionProjections.register(definition)
+    projectionCtx.sessionProjections.register(avatarDefinition)
+
+    const configDefinition: ProjectionDefinition<typeof ARIS_AVATAR_CONFIG_PROJECTION_KEY, ArisAvatarClientConfigValue> = {
+      key: ARIS_AVATAR_CONFIG_PROJECTION_KEY,
+      schema: avatarClientConfigSchema.nullable(),
+      init: (): ArisAvatarClientConfigValue => clientConfig,
+      apply: (state: ArisAvatarClientConfigValue): ArisAvatarClientConfigValue => state,
+      view: (state: ArisAvatarClientConfigValue): ArisAvatarClientConfigValue => state,
+      stateVersion: 1,
+    }
+    projectionCtx.sessionProjections.register(configDefinition)
   })
 }
 

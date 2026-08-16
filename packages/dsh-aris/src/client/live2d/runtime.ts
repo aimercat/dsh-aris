@@ -1,3 +1,4 @@
+import { Live2DModel } from '@jannchie/pixi-live2d-display/cubism4'
 import { Application, Ticker } from 'pixi.js'
 import type { ArisAvatarIntent, ArisAvatarPriority, ArisAvatarTone } from '../../live2d/types.ts'
 import type { Live2DOverlay } from './overlay.ts'
@@ -52,10 +53,6 @@ async function ensureCubismCore(url: string): Promise<void> {
   return cubismCorePromise
 }
 
-async function loadCubism4Module(): Promise<{ Live2DModel: { from(source: string, options?: Record<string, unknown>): Promise<RuntimeModel> } }> {
-  return import('@jannchie/pixi-live2d-display/cubism4') as Promise<{ Live2DModel: { from(source: string, options?: Record<string, unknown>): Promise<RuntimeModel> } }>
-}
-
 function semanticExpression(semantic: 'greeting' | 'thinking' | 'warning' | 'victory' | 'idle'): string | undefined {
   switch (semantic) {
     case 'thinking': return 'f01'
@@ -92,7 +89,6 @@ export class Live2DAvatarRuntime {
   async init(): Promise<void> {
     if (this.destroyed || this.model !== undefined) return
     await ensureCubismCore(this.config.cubismCoreUrl)
-    const { Live2DModel } = await loadCubism4Module()
     const app = new Application()
     await app.init({
       width: STAGE_WIDTH,
@@ -104,6 +100,8 @@ export class Live2DAvatarRuntime {
       preference: 'webgl',
       sharedTicker: true,
     })
+    this.overlay.stage.setAttribute('data-stage-state', 'core-ready')
+    this.overlay.stage.textContent = 'Aris Live2D loading model…'
     this.overlay.stage.replaceChildren(app.canvas)
     this.app = app
 
@@ -113,12 +111,13 @@ export class Live2DAvatarRuntime {
       autoHitTest: false,
       autoUpdate: true,
       ticker: Ticker.shared,
-    })
+    }) as RuntimeModel
     if (this.destroyed) {
       app.destroy(true)
       return
     }
     this.model = model
+    this.overlay.stage.setAttribute('data-stage-state', 'ready')
     model.anchor.set(0.5, 1)
     app.stage.addChild(model as never)
     this.fitModel(this.config.scale)

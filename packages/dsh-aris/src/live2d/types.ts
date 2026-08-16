@@ -1,5 +1,6 @@
 export const ARIS_AVATAR_EVENT = 'aris/avatar'
 export const ARIS_AVATAR_PROJECTION_KEY = 'arisAvatar'
+export const ARIS_AVATAR_CONFIG_PROJECTION_KEY = 'arisAvatarConfig'
 export const ARIS_AVATAR_VERSION = 1 as const
 
 export type ArisAvatarAnchor = 'bottom-right' | 'bottom-left'
@@ -38,6 +39,17 @@ export interface ArisAvatarProjection {
   readonly intent: ArisAvatarIntent
 }
 
+export interface ArisAvatarClientConfig {
+  readonly version: typeof ARIS_AVATAR_VERSION
+  readonly enabled: boolean
+  readonly modelBase: string
+  readonly cubismCoreUrl: string
+  readonly anchor: ArisAvatarAnchor
+  readonly scale: number
+  readonly draggable: boolean
+  readonly followPointer: boolean
+}
+
 export interface ArisAvatarToolResult {
   readonly accepted: boolean
   readonly intentId: string
@@ -48,8 +60,14 @@ export interface ArisAvatarToolResult {
 }
 
 export type ArisAvatarProjectionValue = ArisAvatarProjection | null
+export type ArisAvatarClientConfigValue = ArisAvatarClientConfig | null
 
 export function isArisAvatarProjection(value: unknown): value is ArisAvatarProjection {
+  if (value === undefined || value === null || typeof value !== 'object' || Array.isArray(value)) return false
+  return (value as { version?: unknown }).version === ARIS_AVATAR_VERSION
+}
+
+export function isArisAvatarClientConfig(value: unknown): value is ArisAvatarClientConfig {
   if (value === undefined || value === null || typeof value !== 'object' || Array.isArray(value)) return false
   return (value as { version?: unknown }).version === ARIS_AVATAR_VERSION
 }
@@ -57,6 +75,7 @@ export function isArisAvatarProjection(value: unknown): value is ArisAvatarProje
 declare module '@deepseek-ai/dsh-session-projection/types' {
   interface SessionProjectionMap {
     arisAvatar: ArisAvatarProjectionValue
+    arisAvatarConfig: ArisAvatarClientConfigValue
   }
 }
 

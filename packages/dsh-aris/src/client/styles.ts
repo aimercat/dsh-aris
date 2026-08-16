@@ -113,6 +113,13 @@ export const CSS = `
   border-radius: 12px;
   background: radial-gradient(circle at top, rgba(70, 128, 214, 0.08), rgba(9, 17, 30, 0.05));
 }
+.aris-live2d-stage[data-stage-state="failed"] {
+  color: #ffd6c2;
+  border: 1px solid rgba(255, 166, 87, 0.45);
+}
+.aris-live2d-stage[data-stage-state="core-ready"] {
+  color: #d6e8ff;
+}
 .aris-live2d-stage canvas {
   width: 100%;
   height: 100%;

@@ -1,6 +1,5 @@
 import type { ClientContext, ConversationSnapshot, ISessions, ObservableSnapshot, SessionId } from '@deepseek-ai/dsh-client-runtime/client'
-import type { Config as ArisConfig } from '../../index.ts'
-import { isArisAvatarProjection } from '../../live2d/types.ts'
+import { isArisAvatarClientConfig, isArisAvatarProjection } from '../../live2d/types.ts'
 import { createOverlay } from './overlay.ts'
 import { Live2DAvatarRuntime } from './runtime.ts'
 import { loadState, saveState, type Live2DLocalState } from './state.ts'
@@ -13,12 +12,13 @@ function sessionList(ctx: ClientContext): ObservableSnapshot<{ current: SessionI
   return sessionsPort(ctx).list as unknown as ObservableSnapshot<{ current: SessionId | undefined }>
 }
 
-export function createLive2DBridge(ctx: ClientContext, config: Partial<ArisConfig> = {}): { sync: (enabled: boolean) => void; stop: () => void } {
+export function createLive2DBridge(ctx: ClientContext): { sync: (enabled: boolean) => void; stop: () => void } {
   let active = false
   let currentSessionId: SessionId | undefined
   let localState: Live2DLocalState | undefined
   let overlay: ReturnType<typeof createOverlay> | undefined
   let runtime: Live2DAvatarRuntime | undefined
+  let disposeConfig: (() => void) | undefined
   let disposeProjection: (() => void) | undefined
   let disposeSession: (() => void) | undefined
   let retryTimer: number | undefined
@@ -27,18 +27,21 @@ export function createLive2DBridge(ctx: ClientContext, config: Partial<ArisConfi
   let lastError: string | null = null
   let greetedSession: SessionId | undefined
 
-  const modelBase = config.live2dModelBase?.trim() ?? ''
-  const canRender = (config.live2dEnabled ?? false) && modelBase !== ''
-
-  const teardownSession = (): void => {
-    disposeProjection?.()
-    disposeProjection = undefined
-    disposeSession?.()
-    disposeSession = undefined
+  const teardownRuntime = (): void => {
     runtime?.destroy()
     runtime = undefined
     overlay?.destroy()
     overlay = undefined
+  }
+
+  const teardownSession = (): void => {
+    disposeConfig?.()
+    disposeConfig = undefined
+    disposeProjection?.()
+    disposeProjection = undefined
+    disposeSession?.()
+    disposeSession = undefined
+    teardownRuntime()
     currentSessionId = undefined
     if (retryTimer !== undefined) {
       window.clearTimeout(retryTimer)
@@ -61,34 +64,50 @@ export function createLive2DBridge(ctx: ClientContext, config: Partial<ArisConfi
       return
     }
     currentSessionId = sessionId
-    localState = loadState(config.live2dAnchor ?? 'bottom-right')
-    overlay = createOverlay(document, localState, (next) => {
-      localState = next
-      saveState(next)
-      runtime?.setScale(next.scale)
-    })
-    runtime = new Live2DAvatarRuntime(overlay, {
-      modelBase,
-      cubismCoreUrl: config.live2dCubismCoreUrl?.trim() ?? 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js',
-      scale: localState.scale,
-      followPointer: config.live2dFollowPointer ?? false,
-    })
-    void runtime.init().catch((error) => {
-      console.warn('[dsh-aris] live2d init failed:', error)
-      overlay?.setBubble(`Live2D load failed: ${String(error instanceof Error ? error.message : error)}`.slice(0, 96), 'warning')
-    })
 
+    const configFace = binding.session.projections.faceOf('arisAvatarConfig') as ObservableSnapshot<unknown>
     const projectionFace = binding.session.projections.faceOf('arisAvatar') as ObservableSnapshot<unknown>
+
+    const ensureRuntime = (): void => {
+      const value = configFace.getSnapshot()
+      if (!isArisAvatarClientConfig(value) || !value.enabled || value.modelBase.trim() === '') {
+        teardownRuntime()
+        return
+      }
+      if (overlay !== undefined || runtime !== undefined) return
+
+      localState = loadState(value.anchor)
+      overlay = createOverlay(document, localState, (next) => {
+        localState = next
+        saveState(next)
+        runtime?.setScale(next.scale)
+      })
+      runtime = new Live2DAvatarRuntime(overlay, {
+        modelBase: value.modelBase,
+        cubismCoreUrl: value.cubismCoreUrl,
+        scale: localState.scale,
+        followPointer: value.followPointer,
+      })
+      void runtime.init().catch((error) => {
+        console.warn('[dsh-aris] live2d init failed:', error)
+        if (overlay !== undefined) {
+          overlay.stage.setAttribute('data-stage-state', 'failed')
+          overlay.stage.textContent = `Live2D load failed: ${String(error instanceof Error ? error.message : error)}`.slice(0, 120)
+        }
+        overlay?.setBubble(`Live2D load failed: ${String(error instanceof Error ? error.message : error)}`.slice(0, 96), 'warning')
+      })
+    }
+
     const projectionSync = (): void => {
+      ensureRuntime()
       const value = projectionFace.getSnapshot()
       if (!isArisAvatarProjection(value) || value.intentId === lastIntentId) return
       lastIntentId = value.intentId
       void runtime?.applyIntent(value.intent)
     }
-    projectionSync()
-    disposeProjection = projectionFace.subscribe(projectionSync)
 
     const sessionSync = (): void => {
+      ensureRuntime()
       const snapshot = binding.session.getSnapshot() as ConversationSnapshot
       if (greetedSession !== sessionId) {
         greetedSession = sessionId
@@ -103,13 +122,22 @@ export function createLive2DBridge(ctx: ClientContext, config: Partial<ArisConfi
       }
       lastError = snapshot.lastAgentError
     }
-    sessionSync()
+
+    const configSync = (): void => {
+      ensureRuntime()
+      projectionSync()
+      sessionSync()
+    }
+
+    configSync()
+    disposeConfig = configFace.subscribe(configSync)
+    disposeProjection = projectionFace.subscribe(projectionSync)
     disposeSession = binding.session.subscribe(sessionSync)
   }
 
   const controller = {
     sync(enabled: boolean) {
-      active = enabled && canRender
+      active = enabled
       const sessionId = sessionList(ctx).getSnapshot().current
       if (!active || sessionId === undefined) {
         teardownSession()

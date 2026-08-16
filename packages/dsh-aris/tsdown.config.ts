@@ -34,7 +34,7 @@ export default defineConfig([
     sourcemap: true,
     clean: false,
     deps: {
-      alwaysBundle: ['pixi.js', '@jannchie/pixi-live2d-display'],
+      alwaysBundle: ['pixi.js', '@jannchie/pixi-live2d-display', '@jannchie/pixi-live2d-display/cubism4'],
       neverBundle: ['@deepseek-ai/cordis'],
     },
     define: {

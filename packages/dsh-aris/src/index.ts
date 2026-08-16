@@ -75,6 +75,6 @@ export const Config = Schema.object({
 
 /** Register the Aris host contribution. */
 export function apply(ctx: Context, config: Config): void {
-  registerArisAvatarProjection(ctx)
+  registerArisAvatarProjection(ctx, config)
   registerArisAvatarTool(ctx, config)
 }

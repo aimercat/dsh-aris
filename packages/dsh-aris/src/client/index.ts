@@ -8,7 +8,6 @@
  */
 
 import type { ClientContext, ObservableSnapshot, SessionListState } from '@deepseek-ai/dsh-client-runtime/client'
-import type { Config as ArisConfig } from '../index.ts'
 import { createArisThinkEnhancer } from './aris-think.ts'
 import { installBravePermissionIcon } from './brave-icon.ts'
 import { createLive2DBridge } from './live2d/bridge.ts'
@@ -22,7 +21,7 @@ const ARIS_PRESET_IDS = new Set(['aris', 'aris-dev'])
 
 export const inject = ['sessions']
 
-export function apply(ctx: ClientContext, config: Partial<ArisConfig> = {}): void {
+export function apply(ctx: ClientContext): void {
   try {
     if (typeof localStorage !== 'undefined' && localStorage.getItem('dsh-aris-disabled') === '1') return
   } catch {
@@ -31,7 +30,7 @@ export function apply(ctx: ClientContext, config: Partial<ArisConfig> = {}): voi
 
   let styleTag: HTMLStyleElement | undefined
   const enhancer = createArisThinkEnhancer()
-  const live2d = createLive2DBridge(ctx, config)
+  const live2d = createLive2DBridge(ctx)
   let enabled = false
 
   const disposeBraveIcon = installBravePermissionIcon(document)
