@@ -178,82 +178,141 @@ export const CSS = `
 
 .aris-settings-card {
   list-style: none;
-  border: 1px solid rgba(80, 142, 255, 0.16);
-  border-radius: 10px;
-  background: rgba(42, 89, 177, 0.06);
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-3);
   overflow: hidden;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+.aris-settings-card:hover {
+  border-color: var(--dsw-alias-label-dimmed);
+}
+.aris-settings-card.is-open {
+  background: var(--dsw-alias-bg-layer-2);
+  border-color: var(--dsw-alias-label-dimmed);
 }
 .aris-settings-card__header {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: 12px;
+  padding: 14px 16px;
   border: 0;
+  border-radius: 12px;
   background: transparent;
   color: inherit;
   text-align: left;
   cursor: pointer;
+}
+.aris-settings-card__header:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary);
+  outline-offset: -2px;
 }
 .aris-settings-card__head-text {
   display: flex;
   flex: 1;
   min-width: 0;
   flex-direction: column;
+  gap: 4px;
 }
 .aris-settings-card__name {
-  color: #9fd0ff;
-  font-size: 13px;
+  color: var(--dsw-alias-label-primary);
+  font-size: 15px;
   font-weight: 600;
+  line-height: 1.4;
+}
+.aris-settings-card__name--sub {
+  font-size: 14px;
 }
 .aris-settings-card__description {
-  color: rgba(220, 234, 255, 0.72);
-  font-size: 12px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+  line-height: 1.5;
 }
 .aris-settings-card__pending,
 .aris-settings-card__badge {
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 6px;
-  height: 18px;
+  padding: 1px 8px;
   border-radius: 999px;
   font-size: 11px;
-  background: rgba(74, 129, 255, 0.16);
-  color: #9fd0ff;
+  font-weight: 500;
+  line-height: 17px;
+  background: var(--dsw-alias-bg-module-platform);
+  color: var(--dsw-alias-label-secondary);
 }
 .aris-settings-card__chevron {
-  color: rgba(159, 208, 255, 0.8);
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  transition: transform 0.16s ease;
 }
 .aris-settings-card__chevron.is-open {
   transform: rotate(180deg);
 }
 .aris-settings-card__body {
-  padding: 0 12px 12px;
+  margin: 0 16px;
+  padding: 12px 0 8px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+}
+.aris-settings-card__subcard {
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-3);
+  overflow: hidden;
+}
+.aris-settings-card__subcard.is-open {
+  background: var(--dsw-alias-bg-layer-2);
+  border-color: var(--dsw-alias-label-dimmed);
+}
+.aris-settings-card__subheader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.aris-settings-card__subheader:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary);
+  outline-offset: -2px;
+}
+.aris-settings-card__subbody {
+  margin: 0 14px;
+  padding: 0 0 8px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
 }
 .aris-settings-card__notice,
 .aris-settings-card__hint {
   margin: 0;
   font-size: 12px;
-  color: rgba(220, 234, 255, 0.72);
+  line-height: 1.5;
+  color: var(--dsw-alias-label-tertiary);
 }
 .aris-settings-card__field {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-top: 10px;
+  padding-top: 12px;
 }
 .aris-settings-card__field-head {
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  align-items: flex-start;
 }
 .aris-settings-card__label {
   display: block;
   margin: 0 0 2px;
-  color: #eef6ff;
+  color: var(--dsw-alias-label-primary);
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.4;
 }
 .aris-settings-card__badges {
   display: inline-flex;
@@ -263,16 +322,35 @@ export const CSS = `
 .aris-settings-card__reset,
 .aris-settings-card__action,
 .aris-settings-card__boolean {
-  border: 1px solid rgba(116, 181, 255, 0.28);
-  background: rgba(9, 17, 30, 0.48);
-  color: #d6e8ff;
+  appearance: none;
   border-radius: 8px;
   cursor: pointer;
+  font: inherit;
 }
 .aris-settings-card__reset,
 .aris-settings-card__action {
-  padding: 6px 10px;
-  font-size: 12px;
+  padding: 5px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  border: 1px solid transparent;
+}
+.aris-settings-card__action,
+.aris-settings-card__reset {
+  border-color: var(--dsw-alias-border-l2);
+  color: var(--dsw-alias-label-secondary);
+  background: transparent;
+}
+.aris-settings-card__action--primary {
+  border-color: transparent;
+  background: var(--dsw-alias-brand-primary);
+  color: var(--dsw-alias-static-black);
+}
+.aris-settings-card__action--primary:disabled,
+.aris-settings-card__action:disabled,
+.aris-settings-card__reset:disabled,
+.aris-settings-card__boolean:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 .aris-settings-card__boolean-row {
   display: flex;
@@ -281,19 +359,24 @@ export const CSS = `
 .aris-settings-card__boolean {
   min-width: 56px;
   padding: 6px 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
   font-size: 12px;
+  line-height: 1.5;
 }
-.aris-settings-card__boolean.is-on,
-.aris-settings-card__action--primary {
-  background: rgba(74, 129, 255, 0.22);
-  border-color: rgba(116, 181, 255, 0.45);
-  color: #9fd0ff;
+.aris-settings-card__boolean.is-on {
+  border-color: var(--dsw-alias-brand-primary);
+  background: color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, transparent);
+  color: var(--dsw-alias-label-primary);
 }
 .aris-settings-card__footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  padding-top: 12px;
+  padding: 12px 0 4px;
+  border-top: 1px solid var(--dsw-alias-border-l2);
+  margin-top: 12px;
 }
 `
