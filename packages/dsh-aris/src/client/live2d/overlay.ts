@@ -35,7 +35,6 @@ export function createOverlay(
   const toggle = doc.createElement('button')
   toggle.className = TOGGLE_CLASS
   toggle.type = 'button'
-  toggle.title = '显示/隐藏爱丽丝'
 
   const reset = doc.createElement('button')
   reset.className = RESET_CLASS
@@ -62,13 +61,22 @@ export function createOverlay(
   let dragging = false
   let dragOffsetX = 0
   let dragOffsetY = 0
+  let dragStartX = 0
+  let dragStartY = 0
+  let dragMoved = false
+  let suppressToggleClick = false
+  let dragFromCollapsedToggle = false
+
+  const DRAG_START_THRESHOLD = 4
 
   const apply = (): void => {
     root.style.left = `${state.left}px`
     root.style.top = `${state.top}px`
     root.dataset.hidden = state.hidden ? '1' : '0'
     root.style.setProperty('--aris-live2d-scale', `${state.scale}`)
-    toggle.textContent = state.hidden ? '◉' : '×'
+    toggle.textContent = state.hidden ? '' : '×'
+    toggle.title = state.hidden ? '展开爱丽丝' : '收起爱丽丝'
+    toggle.setAttribute('aria-label', toggle.title)
   }
 
   const commit = (): void => {
@@ -83,11 +91,18 @@ export function createOverlay(
   const finishDrag = (): void => {
     if (!dragging) return
     dragging = false
-    commit()
+    if (dragMoved) commit()
+    dragMoved = false
+    dragFromCollapsedToggle = false
   }
 
   const onToggleClick = (event: MouseEvent): void => {
     event.stopPropagation()
+    if (suppressToggleClick) {
+      suppressToggleClick = false
+      event.preventDefault()
+      return
+    }
     state.hidden = !state.hidden
     commit()
   }
@@ -99,15 +114,29 @@ export function createOverlay(
   }
 
   const onPointerDown = (event: PointerEvent): void => {
-    if ((event.target as Element | null)?.closest('button') !== null) return
+    const target = event.target as Element | null
+    const onButton = target?.closest('button') !== null
+    const onCollapsedToggle = state.hidden && target?.closest(`.${TOGGLE_CLASS}`) !== null
+    if (onButton && !onCollapsedToggle) return
     dragging = true
     dragOffsetX = event.clientX - state.left
     dragOffsetY = event.clientY - state.top
+    dragStartX = event.clientX
+    dragStartY = event.clientY
+    dragMoved = false
+    dragFromCollapsedToggle = onCollapsedToggle
     root.setPointerCapture(event.pointerId)
   }
 
   const onPointerMove = (event: PointerEvent): void => {
     if (!dragging) return
+    const deltaX = event.clientX - dragStartX
+    const deltaY = event.clientY - dragStartY
+    if (!dragMoved) {
+      if (Math.hypot(deltaX, deltaY) < DRAG_START_THRESHOLD) return
+      dragMoved = true
+      if (dragFromCollapsedToggle) suppressToggleClick = true
+    }
     state = normalizeState({
       ...state,
       left: event.clientX - dragOffsetX,

@@ -5,6 +5,8 @@
  * @module aris-think/styles
  */
 
+import { COLLAPSED_AVATAR_URL } from './live2d/collapsed-avatar.ts'
+
 export const STYLE_TAG_ID = 'aris-think-css'
 export const SECTION_ATTR = 'data-aris-sectionized'
 export const SECTION_CLASS = 'aris-think-section'
@@ -93,10 +95,11 @@ export const CSS = `
   outline: 1px solid rgba(93, 162, 255, 0.22);
 }
 [data-dsh-aris-live2d][data-hidden="1"] {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
   outline: none;
+  background: radial-gradient(circle at center, rgba(90, 166, 255, 0.16), rgba(90, 166, 255, 0) 72%);
 }
 [data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-stage,
 [data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-bubble,
@@ -142,12 +145,45 @@ export const CSS = `
   font-size: 12px;
   line-height: 1;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+.aris-live2d-toggle:hover,
+.aris-live2d-reset:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(7, 15, 28, 0.22);
 }
 .aris-live2d-toggle {
   left: 6px;
+  font-weight: 600;
 }
 .aris-live2d-reset {
   left: 34px;
+}
+[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-toggle {
+  top: 4px;
+  left: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(130, 205, 255, 0.72);
+  background-color: #eef9ff;
+  background-image: ${COLLAPSED_AVATAR_URL};
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  box-shadow: 0 8px 20px rgba(34, 84, 160, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-toggle {
+  cursor: grab;
+}
+[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-toggle:active {
+  cursor: grabbing;
+}
+[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-toggle:hover {
+  filter: brightness(1.04);
 }
 .aris-live2d-bubble {
   position: absolute;
