@@ -1,0 +1,135 @@
+{
+  "updatedAt": "2026-08-15",
+  "recommendedStack": {
+    "renderer": "pixi.js",
+    "live2dWrapper": "@jannchie/pixi-live2d-display",
+    "fallbackWrapper": "@naari3/pixi-live2d-display",
+    "strategy": "browser overlay in dsh-aris client plugin"
+  },
+  "officialDocs": [
+    {
+      "title": "Live2D Cubism SDK for Web download",
+      "url": "https://www.live2d.com/en/sdk/download/web/",
+      "purpose": "download official web sdk"
+    },
+    {
+      "title": "Cubism SDK for Web manual",
+      "url": "https://docs.live2d.com/en/cubism-sdk-manual/cubism-sdk-for-web/#download",
+      "purpose": "web sdk overview and setup"
+    },
+    {
+      "title": "Cubism Core manual",
+      "url": "https://docs.live2d.com/en/cubism-sdk-manual/cubism-core/",
+      "purpose": "core runtime concepts"
+    },
+    {
+      "title": "Embedded export data",
+      "url": "https://docs.live2d.com/4.2/en/cubism-editor-manual/export-moc3-motion3-files/",
+      "purpose": "model3.json moc3 motion3 exp3 export structure"
+    },
+    {
+      "title": "Hit area manual",
+      "url": "https://docs.live2d.com/4.2/en/cubism-sdk-manual/hitarea/",
+      "purpose": "click and interaction hit testing"
+    },
+    {
+      "title": "Lip sync tutorial for Web",
+      "url": "https://docs.live2d.com/en/cubism-sdk-tutorials/native-lipsync-from-wav-web/",
+      "purpose": "mouth open parameter driven by audio"
+    },
+    {
+      "title": "Platform support",
+      "url": "https://docs.live2d.com/zh-CHS/cubism-sdk-manual/platform/",
+      "purpose": "browser and platform support notes"
+    },
+    {
+      "title": "Expression manual",
+      "url": "https://docs.live2d.com/en/cubism-sdk-manual/expression/",
+      "purpose": "expression switching design"
+    }
+  ],
+  "runtimePackages": [
+    {
+      "name": "pixi.js",
+      "url": "https://www.npmjs.com/package/pixi.js",
+      "notes": "active WebGL renderer ecosystem"
+    },
+    {
+      "name": "@jannchie/pixi-live2d-display",
+      "url": "https://www.npmjs.com/package/@jannchie/pixi-live2d-display",
+      "notes": "preferred pixi 8 compatible wrapper"
+    },
+    {
+      "name": "@naari3/pixi-live2d-display",
+      "url": "https://www.npmjs.com/package/@naari3/pixi-live2d-display",
+      "notes": "fallback pixi 8 compatible wrapper"
+    },
+    {
+      "name": "pixi-live2d-display original readme",
+      "url": "https://github.com/jannchie/pixi-live2d-display/blob/HEAD/README.zh.md",
+      "notes": "historical community baseline"
+    }
+  ],
+  "referenceProjects": [
+    {
+      "name": "AgentPet",
+      "url": "https://github.com/cqzaaa/AgentPet",
+      "notes": "Electron desktop AI assistant with Pixi based Live2D"
+    },
+    {
+      "name": "maibot-deskpet-plugin",
+      "url": "https://github.com/Maboroshinatsu/maibot-deskpet-plugin",
+      "notes": "Electron Vue PixiJS Live2D desktop pet plugin"
+    },
+    {
+      "name": "hermes-live2d",
+      "url": "https://github.com/Soundpulse/hermes-live2d",
+      "notes": "Tauri desktop pet with eye tracking lip sync expression api"
+    },
+    {
+      "name": "codex-live2d",
+      "url": "https://github.com/yigefw245/codex-live2d",
+      "notes": "desktop pet that reacts to coding agent states"
+    },
+    {
+      "name": "chatgpt-desktopPet",
+      "url": "https://github.com/yoyofx/chatgpt-desktopPet",
+      "notes": "simple Electron live2d desktop pet baseline"
+    },
+    {
+      "name": "CubismWebSamples with lip sync",
+      "url": "https://github.com/easychen/CubismWebSamples-with-lip-sync",
+      "notes": "sample level reference for lip sync integration"
+    }
+  ],
+  "licensing": [
+    {
+      "title": "SDK release license FAQ",
+      "url": "https://help.live2d.com/en/sdk/sdk_001/",
+      "purpose": "publication and release license questions"
+    },
+    {
+      "title": "Sample model commercial use FAQ",
+      "url": "https://help.live2d.com/en/other/other_16/",
+      "purpose": "whether sample models can be used commercially"
+    },
+    {
+      "title": "Sample model terms",
+      "url": "https://www.live2d.com/eula/live2d-sample-model-terms_en.html",
+      "purpose": "rules for redistributing sample models"
+    },
+    {
+      "title": "Chinese sample model FAQ index",
+      "url": "https://help.live2d.com/zh-CHS/tag/%e7%a4%ba%e4%be%8b%e6%a8%a1%e5%9e%8b/",
+      "purpose": "localized copyright and sample model faq index"
+    }
+  ],
+  "implementationNotes": [
+    "prefer one overlay instance for the whole GUI",
+    "gate initialization by active preset equals aris",
+    "destroy pixi app when the active session is not aris",
+    "keep model assets separate from npm code package",
+    "start with idle tap drag expression lazy-load only",
+    "treat voice lip sync as phase 2 or phase 3"
+  ]
+}

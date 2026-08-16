@@ -108,7 +108,7 @@ export function createArisThinkEnhancer(): { start: () => void; stop: () => void
     blocks.forEach(block => observeBlock(block))
   }
 
-  const observeBlock = (block: HTMLElement): void => {
+  const observeBlock = (block: Element): void => {
     const body = block.querySelector<HTMLElement>('[class*="thinkBody"]')
     if (body === null) return
     if (block.getAttribute('data-state') === 'ok') {
