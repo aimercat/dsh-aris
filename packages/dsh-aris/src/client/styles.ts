@@ -342,8 +342,8 @@ export const CSS = `
 }
 .aris-settings-card__action--primary {
   border-color: transparent;
-  background: var(--dsw-alias-brand-primary);
-  color: var(--dsw-alias-static-black);
+  background: var(--dsw-alias-label-primary);
+  color: var(--dsw-alias-bg-layer-3);
 }
 .aris-settings-card__action--primary:disabled,
 .aris-settings-card__action:disabled,
