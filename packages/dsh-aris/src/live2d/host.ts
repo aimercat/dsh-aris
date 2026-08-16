@@ -163,7 +163,7 @@ export function registerArisAvatarProjection(ctx: Context, getConfig: () => Read
       schema: avatarClientConfigSchema.nullable(),
       init: (): ArisAvatarClientConfigValue => buildClientConfig(getConfig()),
       apply: (state: ArisAvatarClientConfigValue): ArisAvatarClientConfigValue => state,
-      view: (state: ArisAvatarClientConfigValue): ArisAvatarClientConfigValue => state,
+      view: (): ArisAvatarClientConfigValue => buildClientConfig(getConfig()),
       stateVersion: 1,
     }
     projectionCtx.sessionProjections.register(configDefinition)

@@ -67,7 +67,7 @@ export function normalizeState(
 ): Live2DLocalState {
   const fallback = defaultState(fallbackAnchor, defaults)
   const scale = clamp(candidate?.scale ?? fallback.scale, 0.45, 1.6)
-  const hidden = candidate?.hidden ?? fallback.hidden
+  const hidden = defaults.hidden
   const anchor = candidate?.anchor ?? fallback.anchor
   const { width, height } = viewportSize()
   const size = footprint(scale, hidden)
