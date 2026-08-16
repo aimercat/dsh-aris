@@ -1,4 +1,5 @@
 param(
+  [string]$TemplateRepo = $(if ($env:DSH_PLUGIN_DEV_TEMPLATE_REPO) { $env:DSH_PLUGIN_DEV_TEMPLATE_REPO } else { 'G:\CodeRep\dsh-plugin-dev-template' }),
   [string]$StableRepo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
   [string]$DevRoot = 'G:\CodeRep\DevRep',
   [string]$DevRepoName = 'dsh_aris_agent',
@@ -9,47 +10,15 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-function Require-Clean([string]$Repo, [string]$Label) {
-  $status = git -C $Repo status --short
-  if ($status) {
-    throw "$Label worktree is not clean:`n$status"
-  }
+$templateScript = Join-Path (Resolve-Path $TemplateRepo).Path 'scripts\promote-plugin-dev.ps1'
+if (-not (Test-Path $templateScript)) {
+  throw "Template promote script not found: $templateScript"
 }
 
-$stableRepo = (Resolve-Path $StableRepo).Path
-$devRepo = Join-Path $DevRoot $DevRepoName
-
-if (-not (Test-Path (Join-Path $stableRepo '.git'))) {
-  throw "Stable repo is not a git repository: $stableRepo"
-}
-if (-not (Test-Path (Join-Path $devRepo '.git'))) {
-  throw "Dev repo is not a git worktree/repository: $devRepo"
-}
-
-Require-Clean $stableRepo 'Stable'
-Require-Clean $devRepo 'Dev'
-
-Write-Host 'Promote plan:'
-Write-Host "Stable repo  : $stableRepo"
-Write-Host "Dev repo     : $devRepo"
-Write-Host "Stable branch: $StableBranch"
-Write-Host "Dev branch   : $DevBranch"
-Write-Host ''
-Write-Host 'Commands:'
-Write-Host "git -C `"$stableRepo`" switch $StableBranch"
-Write-Host "git -C `"$stableRepo`" merge --ff-only $DevBranch"
-
-if (-not $Execute) {
-  Write-Host ''
-  Write-Host 'Dry run only. Add -Execute to perform the fast-forward merge.'
-  exit 0
-}
-
-git -C $stableRepo switch $StableBranch
-if ($LASTEXITCODE -ne 0) { throw "Failed to switch stable repo to $StableBranch" }
-
-git -C $stableRepo merge --ff-only $DevBranch
-if ($LASTEXITCODE -ne 0) { throw "Failed to fast-forward merge $DevBranch into $StableBranch" }
-
-Write-Host ''
-Write-Host 'Promote complete.'
+& $templateScript `
+  -StableRepo $StableRepo `
+  -DevRoot $DevRoot `
+  -DevRepoName $DevRepoName `
+  -DevBranch $DevBranch `
+  -StableBranch $StableBranch `
+  -Execute:$Execute

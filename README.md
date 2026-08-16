@@ -34,16 +34,30 @@ Copy-Item "<repo-path>\packages\dsh-aris\preset\aris" "$env:USERPROFILE\.dsh\.ag
 
 ## Staging
 
-非 Docker 的 staging 工作流已以爱丽丝插件为例落地，见：
+本仓库只保留 `aris-dev` 专用薄包装；通用开发隔离实现与模板文档已经迁到独立仓库：
 
-- `docs/staging-workflow.md`
+- 本地模板仓库：`G:\CodeRep\dsh-plugin-dev-template`
+- GitHub：`https://github.com/aimercat/dsh-plugin-dev-template`
+- 通用说明：`G:\CodeRep\dsh-plugin-dev-template\docs\plugin-dev-template.md`
+- 爱丽丝专用说明：`docs/staging-workflow.md`
+
+本仓库保留的入口只有：
+
 - `scripts/setup-aris-dev.cmd` / `.ps1`
+- `scripts/start-aris-dev.cmd`
 - `scripts/sync-aris-dev.cmd` / `.ps1`
 - `scripts/verify-aris-dev.cmd` / `.ps1`
 - `scripts/promote-aris-dev.cmd` / `.ps1`
 
-当前约定所有插件的开发副本统一放在 `G:\CodeRep\DevRep`。
-推荐 dev 启动方式：`dsh --profile aris-dev --port 3081`
+这些脚本会转发到模板仓库里的 `plugin-dev` 实现，并固定爱丽丝默认参数：
+
+- 开发副本根目录：`G:\CodeRep\DevRep`
+- 开发 profile：`aris-dev`
+- 开发 preset：`勇者爱丽丝（Dev）`
+- 独立 `DSH_HOME`：`C:\Users\Duang\.dsh-dev`
+- 推荐启动入口：`scripts\start-aris-dev.cmd`
+
+如果模板仓库不在默认路径，可以先设置环境变量 `DSH_PLUGIN_DEV_TEMPLATE_REPO` 再运行上述脚本。
 
 ## 方向
 
