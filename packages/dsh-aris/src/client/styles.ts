@@ -343,7 +343,18 @@ export const CSS = `
 .aris-settings-card__action--primary {
   border-color: transparent;
   background: var(--dsw-alias-label-primary);
-  color: var(--dsw-alias-bg-layer-3);
+  color: rgb(9, 17, 30);
+  font-weight: 500;
+}
+.aris-settings-card__action--primary:hover:not(:disabled) {
+  filter: brightness(0.96);
+}
+.aris-settings-card__action--primary:focus-visible,
+.aris-settings-card__action:focus-visible,
+.aris-settings-card__reset:focus-visible,
+.aris-settings-card__boolean:focus-visible {
+  outline: 2px solid var(--dsw-alias-brand-primary);
+  outline-offset: 1px;
 }
 .aris-settings-card__action--primary:disabled,
 .aris-settings-card__action:disabled,
