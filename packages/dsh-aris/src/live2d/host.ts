@@ -59,6 +59,9 @@ const avatarClientConfigSchema: z.ZodType<ArisAvatarClientConfig> = z.object({
   scale: z.number().positive(),
   draggable: z.boolean(),
   followPointer: z.boolean(),
+  muted: z.boolean(),
+  allowMotionSound: z.boolean(),
+  defaultHidden: z.boolean(),
 })
 
 function renderToolResult(value: ArisAvatarToolResult): string {
@@ -134,6 +137,9 @@ function buildClientConfig(config: Readonly<Config>): ArisAvatarClientConfigValu
     scale: config.live2dScale,
     draggable: config.live2dDraggable,
     followPointer: config.live2dFollowPointer,
+    muted: config.live2dMuted,
+    allowMotionSound: config.live2dAllowMotionSound,
+    defaultHidden: config.live2dDefaultHidden,
   })
 }
 

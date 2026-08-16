@@ -1,3 +1,3 @@
-import { Live2DModel } from '@jannchie/pixi-live2d-display/cubism4'
+import { Live2DModel, SoundManager, config } from '@jannchie/pixi-live2d-display/cubism4'
 
-export { Live2DModel }
+export { Live2DModel, SoundManager, config }

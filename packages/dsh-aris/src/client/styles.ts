@@ -99,7 +99,9 @@ export const CSS = `
   outline: none;
 }
 [data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-stage,
-[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-bubble {
+[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-bubble,
+[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-mute,
+[data-dsh-aris-live2d][data-hidden="1"] .aris-live2d-reset {
   display: none;
 }
 .aris-live2d-stage {
@@ -127,10 +129,11 @@ export const CSS = `
   height: 100%;
   display: block;
 }
-.aris-live2d-toggle {
+.aris-live2d-toggle,
+.aris-live2d-mute,
+.aris-live2d-reset {
   position: absolute;
   top: 6px;
-  left: 6px;
   z-index: 2;
   width: 22px;
   height: 22px;
@@ -141,6 +144,15 @@ export const CSS = `
   font-size: 12px;
   line-height: 1;
   cursor: pointer;
+}
+.aris-live2d-toggle {
+  left: 6px;
+}
+.aris-live2d-mute {
+  left: 34px;
+}
+.aris-live2d-reset {
+  left: 62px;
 }
 .aris-live2d-bubble {
   position: absolute;

@@ -8,6 +8,8 @@ export interface Live2DRuntimeConfig {
   cubismCoreUrl: string
   scale: number
   followPointer: boolean
+  muted: boolean
+  allowMotionSound: boolean
 }
 
 interface RuntimeModel {
@@ -18,6 +20,16 @@ interface RuntimeModel {
   focus(x: number, y: number, instant?: boolean): void
   expression(id?: number | string): Promise<boolean>
   motion(group: string, index?: number, priority?: number): Promise<boolean>
+}
+
+interface RuntimeSoundManager {
+  volume: number
+  audios: HTMLAudioElement[]
+  destroy(): void
+}
+
+interface RuntimeGlobalConfig {
+  sound: boolean
 }
 
 let cubismCorePromise: Promise<void> | undefined
@@ -52,8 +64,16 @@ async function ensureCubismCore(url: string): Promise<void> {
   return cubismCorePromise
 }
 
-async function loadCubism4Module(): Promise<{ Live2DModel: { from(source: string, options?: Record<string, unknown>): Promise<RuntimeModel> } }> {
-  return import('./cubism4-module.ts') as Promise<{ Live2DModel: { from(source: string, options?: Record<string, unknown>): Promise<RuntimeModel> } }>
+async function loadCubism4Module(): Promise<{
+  Live2DModel: { from(source: string, options?: Record<string, unknown>): Promise<RuntimeModel> }
+  SoundManager: RuntimeSoundManager
+  config: RuntimeGlobalConfig
+}> {
+  return import('./cubism4-module.ts') as Promise<{
+    Live2DModel: { from(source: string, options?: Record<string, unknown>): Promise<RuntimeModel> }
+    SoundManager: RuntimeSoundManager
+    config: RuntimeGlobalConfig
+  }>
 }
 
 function semanticExpression(semantic: 'greeting' | 'thinking' | 'warning' | 'victory' | 'idle'): string | undefined {
@@ -84,16 +104,26 @@ export class Live2DAvatarRuntime {
   private bubbleTimer: number | undefined
   private destroyed = false
   private pointerMoveHandler: ((event: PointerEvent) => void) | undefined
+  private soundManager: RuntimeSoundManager | undefined
+  private live2dConfig: RuntimeGlobalConfig | undefined
+  private muted: boolean
+  private motionSoundEnabled: boolean
 
   constructor(overlay: Live2DOverlay, config: Live2DRuntimeConfig) {
     this.overlay = overlay
     this.config = config
+    this.muted = config.muted
+    this.motionSoundEnabled = config.allowMotionSound
   }
 
   async init(): Promise<void> {
     if (this.destroyed || this.model !== undefined) return
     await ensureCubismCore(this.config.cubismCoreUrl)
-    const { Live2DModel } = await loadCubism4Module()
+    const { Live2DModel, SoundManager, config } = await loadCubism4Module()
+    this.soundManager = SoundManager
+    this.live2dConfig = config
+    this.applySoundPolicy()
+
     const app = new Application()
     await app.init({
       width: STAGE_WIDTH,
@@ -136,6 +166,20 @@ export class Live2DAvatarRuntime {
     this.fitModel(this.config.scale)
     this.attachPointerTracking()
     await this.performSemantic('greeting')
+  }
+
+  private applySoundPolicy(): void {
+    const audible = this.motionSoundEnabled && !this.muted
+    if (this.live2dConfig !== undefined) {
+      this.live2dConfig.sound = audible
+    }
+    if (this.soundManager !== undefined) {
+      this.soundManager.volume = audible ? 1 : 0
+      for (const audio of this.soundManager.audios) {
+        audio.muted = !audible
+        audio.volume = audible ? 1 : 0
+      }
+    }
   }
 
   private safeDestroyApp(app: Application): void {
@@ -213,6 +257,16 @@ export class Live2DAvatarRuntime {
     this.fitModel(scale)
   }
 
+  setMuted(muted: boolean): void {
+    this.muted = muted
+    this.applySoundPolicy()
+  }
+
+  setMotionSoundEnabled(enabled: boolean): void {
+    this.motionSoundEnabled = enabled
+    this.applySoundPolicy()
+  }
+
   destroy(): void {
     this.destroyed = true
     if (this.bubbleTimer !== undefined) window.clearTimeout(this.bubbleTimer)
@@ -221,6 +275,13 @@ export class Live2DAvatarRuntime {
     if (this.pointerMoveHandler !== undefined) {
       this.overlay.stage.removeEventListener('pointermove', this.pointerMoveHandler)
       this.pointerMoveHandler = undefined
+    }
+    if (this.soundManager !== undefined) {
+      try {
+        this.soundManager.destroy()
+      } catch (error) {
+        console.warn('[dsh-aris] live2d sound destroy failed:', error)
+      }
     }
     const app = this.app
     this.app = undefined

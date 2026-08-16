@@ -46,6 +46,12 @@ export interface Config {
   live2dDraggable: boolean
   /** Whether the avatar should lightly follow the pointer. */
   live2dFollowPointer: boolean
+  /** Whether the avatar starts muted. */
+  live2dMuted: boolean
+  /** Whether motion-linked sound files are allowed to play. */
+  live2dAllowMotionSound: boolean
+  /** Whether the overlay starts as a compact launcher. */
+  live2dDefaultHidden: boolean
 }
 
 /** 插件配置 schema，供 Cordis loader 做校验与默认值注入。 */
@@ -70,6 +76,15 @@ export const Config = Schema.object({
   ),
   live2dFollowPointer: Schema.boolean().default(false).description(
     '是否让爱丽丝轻微跟随指针。',
+  ),
+  live2dMuted: Schema.boolean().default(false).description(
+    '是否默认静音爱丽丝模型音频。',
+  ),
+  live2dAllowMotionSound: Schema.boolean().default(true).description(
+    '是否允许播放 motion 里自带的音频资源。',
+  ),
+  live2dDefaultHidden: Schema.boolean().default(false).description(
+    '是否默认以折叠 launcher 形态显示爱丽丝。',
   ),
 })
 

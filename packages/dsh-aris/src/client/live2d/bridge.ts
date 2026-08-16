@@ -2,7 +2,7 @@ import type { ClientContext, ConversationSnapshot, ISessions, ObservableSnapshot
 import { isArisAvatarClientConfig, isArisAvatarProjection } from '../../live2d/types.ts'
 import { createOverlay } from './overlay.ts'
 import { Live2DAvatarRuntime } from './runtime.ts'
-import { loadState, saveState, type Live2DLocalState } from './state.ts'
+import { defaultState, loadState, saveState, type Live2DLocalState, type Live2DStateDefaults } from './state.ts'
 
 function sessionsPort(ctx: ClientContext): ISessions {
   return ctx.sessions as unknown as ISessions
@@ -74,19 +74,33 @@ export function createLive2DBridge(ctx: ClientContext): { sync: (enabled: boolea
         teardownRuntime()
         return
       }
-      if (overlay !== undefined || runtime !== undefined) return
 
-      localState = loadState(value.anchor)
-      overlay = createOverlay(document, localState, (next) => {
+      const stateDefaults: Live2DStateDefaults = {
+        scale: value.scale,
+        hidden: value.defaultHidden,
+        muted: value.muted,
+      }
+
+      if (overlay !== undefined || runtime !== undefined) {
+        runtime?.setMotionSoundEnabled(value.allowMotionSound)
+        runtime?.setMuted(localState?.muted ?? value.muted)
+        return
+      }
+
+      localState = loadState(value.anchor, stateDefaults)
+      overlay = createOverlay(document, localState, () => defaultState(value.anchor, stateDefaults), (next) => {
         localState = next
         saveState(next)
         runtime?.setScale(next.scale)
+        runtime?.setMuted(next.muted)
       })
       runtime = new Live2DAvatarRuntime(overlay, {
         modelBase: value.modelBase,
         cubismCoreUrl: value.cubismCoreUrl,
         scale: localState.scale,
         followPointer: value.followPointer,
+        muted: localState.muted,
+        allowMotionSound: value.allowMotionSound,
       })
       void runtime.init().catch((error) => {
         console.warn('[dsh-aris] live2d init failed:', error)

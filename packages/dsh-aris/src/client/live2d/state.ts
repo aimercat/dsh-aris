@@ -7,11 +7,18 @@ export const HIDDEN_WIDTH = 34
 export const HIDDEN_HEIGHT = 34
 export const VIEWPORT_PADDING = 12
 
+export interface Live2DStateDefaults {
+  scale: number
+  hidden: boolean
+  muted: boolean
+}
+
 export interface Live2DLocalState {
   left: number
   top: number
   scale: number
   hidden: boolean
+  muted: boolean
   anchor: ArisAvatarAnchor
 }
 
@@ -39,19 +46,32 @@ function footprint(scale: number, hidden: boolean): { width: number; height: num
   }
 }
 
-export function defaultState(anchor: ArisAvatarAnchor): Live2DLocalState {
+export function defaultState(anchor: ArisAvatarAnchor, defaults: Live2DStateDefaults): Live2DLocalState {
   const { width, height } = viewportSize()
+  const size = footprint(defaults.scale, defaults.hidden)
   const left = anchor === 'bottom-left'
     ? 24
-    : Math.max(24, width - STAGE_WIDTH - 24)
-  const top = Math.max(24, height - STAGE_HEIGHT - 24)
-  return { left, top, scale: 1, hidden: false, anchor }
+    : Math.max(24, width - size.width - 24)
+  const top = Math.max(24, height - size.height - 24)
+  return {
+    left,
+    top,
+    scale: defaults.scale,
+    hidden: defaults.hidden,
+    muted: defaults.muted,
+    anchor,
+  }
 }
 
-export function normalizeState(candidate: Partial<Live2DLocalState> | undefined, fallbackAnchor: ArisAvatarAnchor): Live2DLocalState {
-  const fallback = defaultState(fallbackAnchor)
+export function normalizeState(
+  candidate: Partial<Live2DLocalState> | undefined,
+  fallbackAnchor: ArisAvatarAnchor,
+  defaults: Live2DStateDefaults,
+): Live2DLocalState {
+  const fallback = defaultState(fallbackAnchor, defaults)
   const scale = clamp(candidate?.scale ?? fallback.scale, 0.45, 1.6)
   const hidden = candidate?.hidden ?? fallback.hidden
+  const muted = candidate?.muted ?? fallback.muted
   const anchor = candidate?.anchor ?? fallback.anchor
   const { width, height } = viewportSize()
   const size = footprint(scale, hidden)
@@ -63,18 +83,19 @@ export function normalizeState(candidate: Partial<Live2DLocalState> | undefined,
     top: clamp(candidate?.top ?? fallback.top, VIEWPORT_PADDING, maxTop),
     scale,
     hidden,
+    muted,
     anchor,
   }
 }
 
-export function loadState(anchor: ArisAvatarAnchor): Live2DLocalState {
+export function loadState(anchor: ArisAvatarAnchor, defaults: Live2DStateDefaults): Live2DLocalState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw === null) return defaultState(anchor)
+    if (raw === null) return defaultState(anchor, defaults)
     const parsed = JSON.parse(raw) as Partial<Live2DLocalState>
-    return normalizeState(parsed, anchor)
+    return normalizeState(parsed, anchor, defaults)
   } catch {
-    return defaultState(anchor)
+    return defaultState(anchor, defaults)
   }
 }
 

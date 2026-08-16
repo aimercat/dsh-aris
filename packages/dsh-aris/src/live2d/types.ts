@@ -48,6 +48,9 @@ export interface ArisAvatarClientConfig {
   readonly scale: number
   readonly draggable: boolean
   readonly followPointer: boolean
+  readonly muted: boolean
+  readonly allowMotionSound: boolean
+  readonly defaultHidden: boolean
 }
 
 export interface ArisAvatarToolResult {
