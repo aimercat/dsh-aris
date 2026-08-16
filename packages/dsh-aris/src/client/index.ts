@@ -8,8 +8,12 @@
  */
 
 import type { ClientContext, ObservableSnapshot, SessionListState } from '@deepseek-ai/dsh-client-runtime/client'
+import type {} from '@deepseek-ai/dsh-client-locale/client'
+import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
+import type {} from '@deepseek-ai/dsh-client-ui-slots'
 import { createArisThinkEnhancer } from './aris-think.ts'
 import { installBravePermissionIcon } from './brave-icon.ts'
+import { registerArisLive2DSettingsCard } from './live2d-settings/index.ts'
 import { createLive2DBridge } from './live2d/bridge.ts'
 import { CSS, STYLE_TAG_ID } from './styles.ts'
 
@@ -19,16 +23,19 @@ function sessionList(ctx: ClientContext): ObservableSnapshot<SessionListState> {
 
 const ARIS_PRESET_IDS = new Set(['aris', 'aris-dev'])
 
-export const inject = ['sessions']
+export const inject = ['sessions', 'slots', 'locale', 'connection', 'settingsScope', 'remote', 'webUiSettings']
 
 export function apply(ctx: ClientContext): void {
+  let styleTag: HTMLStyleElement | undefined = injectStyle()
+  registerArisLive2DSettingsCard(ctx)
+
+  let disabled = false
   try {
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('dsh-aris-disabled') === '1') return
+    disabled = typeof localStorage !== 'undefined' && localStorage.getItem('dsh-aris-disabled') === '1'
   } catch {
     // Storage may be unavailable in odd contexts; continue normally.
   }
 
-  let styleTag: HTMLStyleElement | undefined
   const enhancer = createArisThinkEnhancer()
   const live2d = createLive2DBridge(ctx)
   let enabled = false
@@ -44,27 +51,24 @@ export function apply(ctx: ClientContext): void {
     enabled = next
     if (enabled) {
       try {
-        styleTag = injectStyle()
         enhancer.start()
         live2d.sync(true)
       } catch (error) {
         console.warn('[dsh-aris] enhancer start failed:', error)
         live2d.stop()
-        removeStyle(styleTag)
-        styleTag = undefined
         enabled = false
       }
     } else {
       live2d.stop()
       enhancer.stop()
-      removeStyle(styleTag)
-      styleTag = undefined
     }
   }
 
   ctx.effect(() => {
-    syncEnablement()
-    const dispose = sessionList(ctx).subscribe(syncEnablement)
+    if (!disabled) {
+      syncEnablement()
+    }
+    const dispose = disabled ? (() => {}) : sessionList(ctx).subscribe(syncEnablement)
     return () => {
       dispose()
       disposeBraveIcon()

@@ -70,7 +70,7 @@ function renderToolResult(value: ArisAvatarToolResult): string {
   const intent = value.projection.intent
   if (intent.type === 'motion') return `Aris avatar control accepted: motion ${intent.group}${intent.index === undefined ? '' : `#${intent.index}`} (${status}).`
   if (intent.type === 'expression') return `Aris avatar control accepted: expression ${intent.expression} (${status}).`
-  return `Aris avatar control accepted: bubble \"${intent.text}\" (${status}).`
+  return `Aris avatar control accepted: bubble "${intent.text}" (${status}).`
 }
 
 function toPriority(value: string | undefined): ArisAvatarPriority | undefined {
@@ -143,8 +143,7 @@ function buildClientConfig(config: Readonly<Config>): ArisAvatarClientConfigValu
   })
 }
 
-export function registerArisAvatarProjection(ctx: Context, config: Readonly<Config>): void {
-  const clientConfig = buildClientConfig(config)
+export function registerArisAvatarProjection(ctx: Context, getConfig: () => Readonly<Config>): void {
   ctx.inject(['sessionProjections'], (projectionCtx) => {
     const avatarDefinition: ProjectionDefinition<typeof ARIS_AVATAR_PROJECTION_KEY, ArisAvatarProjectionValue> = {
       key: ARIS_AVATAR_PROJECTION_KEY,
@@ -162,7 +161,7 @@ export function registerArisAvatarProjection(ctx: Context, config: Readonly<Conf
     const configDefinition: ProjectionDefinition<typeof ARIS_AVATAR_CONFIG_PROJECTION_KEY, ArisAvatarClientConfigValue> = {
       key: ARIS_AVATAR_CONFIG_PROJECTION_KEY,
       schema: avatarClientConfigSchema.nullable(),
-      init: (): ArisAvatarClientConfigValue => clientConfig,
+      init: (): ArisAvatarClientConfigValue => buildClientConfig(getConfig()),
       apply: (state: ArisAvatarClientConfigValue): ArisAvatarClientConfigValue => state,
       view: (state: ArisAvatarClientConfigValue): ArisAvatarClientConfigValue => state,
       stateVersion: 1,
@@ -171,7 +170,7 @@ export function registerArisAvatarProjection(ctx: Context, config: Readonly<Conf
   })
 }
 
-export function registerArisAvatarTool(ctx: Context, config: Readonly<Config>): void {
+export function registerArisAvatarTool(ctx: Context, getConfig: () => Readonly<Config>): void {
   ctx.tools.register(defineTool({
     name: 'aris_avatar_control',
     description: 'Control the Aris live avatar with a declarative motion, expression, or bubble intent.',
@@ -240,6 +239,7 @@ export function registerArisAvatarTool(ctx: Context, config: Readonly<Config>): 
       render: (_args, value) => [{ type: 'text', text: renderToolResult(value as ArisAvatarToolResult) }],
     },
     async execute(args, exec) {
+      const config = getConfig()
       const intent = buildIntent(args)
       const intentId = newIntentId()
       const enabled = config.live2dEnabled && config.live2dModelBase.trim() !== ''

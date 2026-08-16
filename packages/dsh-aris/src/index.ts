@@ -17,8 +17,14 @@
 
 import type { Context } from '@deepseek-ai/cordis'
 import Schema from '@deepseek-ai/schemastery'
+import { installSettingsSection } from '@deepseek-ai/dsh-settings'
 import type { ArisAvatarAnchor } from './live2d/types.ts'
 import { registerArisAvatarProjection, registerArisAvatarTool } from './live2d/host.ts'
+import {
+  ARIS_LIVE2D_SETTINGS_NS,
+  ArisLive2DSettingsSchema,
+  type ArisLive2DSettingsSection,
+} from './live2d/settings.ts'
 
 /** Cordis plugin name. */
 export const name = 'aris'
@@ -88,8 +94,35 @@ export const Config = Schema.object({
   ),
 })
 
+function currentSettingsFromConfig(config: Readonly<Config>): ArisLive2DSettingsSection {
+  return {
+    muted: config.live2dMuted,
+    allowMotionSound: config.live2dAllowMotionSound,
+    defaultHidden: config.live2dDefaultHidden,
+  }
+}
+
 /** Register the Aris host contribution. */
 export function apply(ctx: Context, config: Config): void {
-  registerArisAvatarProjection(ctx, config)
-  registerArisAvatarTool(ctx, config)
+  let currentSettings: () => ArisLive2DSettingsSection = () => currentSettingsFromConfig(config)
+
+  const currentConfig = (): Config => ({
+    ...config,
+    live2dMuted: currentSettings().muted,
+    live2dAllowMotionSound: currentSettings().allowMotionSound,
+    live2dDefaultHidden: currentSettings().defaultHidden,
+  })
+
+  installSettingsSection(ctx, ARIS_LIVE2D_SETTINGS_NS, ArisLive2DSettingsSchema, currentSettingsFromConfig(config), {
+    setSource(source) {
+      currentSettings = source
+    },
+    onChange() {
+      // Current sessions read these client-facing values via the settings scope.
+      // Host-side getters see the latest source on next access.
+    },
+  })
+
+  registerArisAvatarProjection(ctx, currentConfig)
+  registerArisAvatarTool(ctx, currentConfig)
 }

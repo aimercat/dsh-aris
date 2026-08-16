@@ -35,7 +35,15 @@ export default defineConfig([
     clean: false,
     deps: {
       alwaysBundle: ['pixi.js', '@jannchie/pixi-live2d-display', '@jannchie/pixi-live2d-display/cubism4'],
-      neverBundle: ['@deepseek-ai/cordis'],
+      neverBundle: [
+        '@deepseek-ai/cordis',
+        '@deepseek-ai/dsh-client-locale',
+        '@deepseek-ai/dsh-client-runtime',
+        '@deepseek-ai/dsh-client-ui-settings',
+        '@deepseek-ai/dsh-client-ui-slots',
+        'react',
+        'react/jsx-runtime',
+      ],
     },
     define: {
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),
