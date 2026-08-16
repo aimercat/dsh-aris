@@ -18,7 +18,7 @@ function sessionList(ctx: ClientContext): ObservableSnapshot<SessionListState> {
   return ctx.sessions.list as unknown as ObservableSnapshot<SessionListState>
 }
 
-const ARIS_PRESET_ID = 'aris'
+const ARIS_PRESET_IDS = new Set(['aris', 'aris-dev'])
 
 export const inject = ['sessions']
 
@@ -84,7 +84,8 @@ function isArisSession(ctx: ClientContext): boolean {
     const sessionId = snapshot.current as string | undefined
     if (sessionId === undefined) return false
     const byId = snapshot.byId as Record<string, { agentPreset?: string } | undefined>
-    return byId[sessionId]?.agentPreset === ARIS_PRESET_ID
+    const preset = byId[sessionId]?.agentPreset
+    return preset !== undefined && ARIS_PRESET_IDS.has(preset)
   } catch (error) {
     console.warn('[dsh-aris] preset gate read failed:', error)
     return false

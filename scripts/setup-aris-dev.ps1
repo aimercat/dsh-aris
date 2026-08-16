@@ -7,6 +7,9 @@ param(
   [string]$DevPresetId = 'aris-dev',
   [string]$BaseProfile = 'web',
   [int]$DevPort = 3081,
+  [string]$Live2DModelBase = '',
+  [string]$Live2DCubismCoreUrl = 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js',
+  [switch]$EnableLive2D,
   [switch]$InstallPlugin
 )
 
@@ -106,6 +109,21 @@ if (Test-Path $basePatch) {
   Copy-Item $basePatch $devPatch -Force
 }
 
+if ($EnableLive2D -or $Live2DModelBase -ne '') {
+  @"
+
+- id: dsh-aris
+  config:
+    live2dEnabled: true
+    live2dModelBase: $Live2DModelBase
+    live2dCubismCoreUrl: $Live2DCubismCoreUrl
+    live2dAnchor: bottom-right
+    live2dScale: 1
+    live2dDraggable: true
+    live2dFollowPointer: false
+"@ | Add-Content -Path $devPatch
+}
+
 Write-Host ''
 Write-Host 'Staging environment prepared.'
 Write-Host "Source repo : $sourceRepo"
@@ -119,7 +137,12 @@ Write-Host "1. Open the dev repo: $devRepo"
 Write-Host "2. Start DSH with profile on a separate port:"
 Write-Host "   dsh --profile $DevProfile --port $DevPort"
 Write-Host "3. Open http://127.0.0.1:$DevPort and start a session with preset: 勇者爱丽丝（Dev）"
-Write-Host "4. If needed, verify the dev repo before testing:"
+if ($EnableLive2D -or $Live2DModelBase -ne '') {
+  Write-Host "4. Live2D config written to $devPatch"
+} else {
+  Write-Host "4. Live2D is still off by default. Re-run with -EnableLive2D -Live2DModelBase <model3.json path> when you have a Cubism 3/4 model."
+}
+Write-Host "5. If needed, verify the dev repo before testing:"
 Write-Host "   powershell -ExecutionPolicy Bypass -File $sourceRepo\scripts\verify-aris-dev.ps1 -RepoPath $devRepo"
 
 if ($InstallPlugin) {

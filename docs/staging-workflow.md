@@ -53,7 +53,7 @@ G:\CodeRep\DevRep\<plugin-name>
 - 日常：`aris`
 - 开发：`aris-dev`
 
-开发 preset 建议显示名改成 `勇者爱丽丝（Dev）`，避免 GUI 中误选。
+开发 preset 建议显示名改成 `勇者爱丽丝（Dev）`，避免 GUI 中误选。若插件内部存在按 preset id 启用的逻辑（如 Aris 的 thinking / Live2D gate），也必须显式把 `aris-dev` 视为受支持的 preset id，而不能只硬编码 `aris`。
 
 ## 爱丽丝插件的落地实践
 

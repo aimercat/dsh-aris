@@ -59,7 +59,10 @@ export function createLive2DBridge(ctx: ClientContext, config: Partial<ArisConfi
       scale: localState.scale,
       followPointer: config.live2dFollowPointer ?? false,
     })
-    void runtime.init()
+    void runtime.init().catch((error) => {
+      console.warn('[dsh-aris] live2d init failed:', error)
+      overlay?.setBubble(`Live2D load failed: ${String(error instanceof Error ? error.message : error)}`.slice(0, 96), 'warning')
+    })
 
     const projectionFace = binding.session.projections.faceOf('arisAvatar') as ObservableSnapshot<unknown>
     const projectionSync = (): void => {

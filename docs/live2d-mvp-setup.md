@@ -53,10 +53,11 @@ Copy-Item "<repo-path>\packages\dsh-aris\preset\aris" "$env:USERPROFILE\.dsh\.ag
 
 ## 如何验证
 
-1. 以 `aris` preset 开一个新会话
+1. 以 `aris` / `aris-dev` preset 开一个新会话
 2. 确认该 profile 中 `@aimercat/dsh-aris` 的 `live2dEnabled` 已开启
-3. 确认 `live2dModelBase` 指向有效模型设置文件
-4. 打开会话后，应出现右下角 Live2D overlay
+3. 确认 `live2dModelBase` 指向有效的 Cubism 3/4 `model3.json` 文件
+4. 确认 `live2dCubismCoreUrl` 可访问（默认会自动加载官方 Cubism Core）
+5. 打开会话后，应出现右下角 Live2D overlay
 5. 会话开始时会触发一次 `greeting` 语义动作
 6. 会话运行中：
    - 思考/运行时进入 `thinking`
