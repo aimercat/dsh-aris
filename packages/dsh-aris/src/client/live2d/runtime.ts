@@ -1,4 +1,3 @@
-import { Live2DModel } from '@jannchie/pixi-live2d-display/cubism4'
 import { Application, Ticker } from 'pixi.js'
 import type { ArisAvatarIntent, ArisAvatarPriority, ArisAvatarTone } from '../../live2d/types.ts'
 import type { Live2DOverlay } from './overlay.ts'
@@ -53,6 +52,10 @@ async function ensureCubismCore(url: string): Promise<void> {
   return cubismCorePromise
 }
 
+async function loadCubism4Module(): Promise<{ Live2DModel: { from(source: string, options?: Record<string, unknown>): Promise<RuntimeModel> } }> {
+  return import('./cubism4-module.ts') as Promise<{ Live2DModel: { from(source: string, options?: Record<string, unknown>): Promise<RuntimeModel> } }>
+}
+
 function semanticExpression(semantic: 'greeting' | 'thinking' | 'warning' | 'victory' | 'idle'): string | undefined {
   switch (semantic) {
     case 'thinking': return 'f01'
@@ -89,6 +92,7 @@ export class Live2DAvatarRuntime {
   async init(): Promise<void> {
     if (this.destroyed || this.model !== undefined) return
     await ensureCubismCore(this.config.cubismCoreUrl)
+    const { Live2DModel } = await loadCubism4Module()
     const app = new Application()
     await app.init({
       width: STAGE_WIDTH,
