@@ -75,6 +75,14 @@ export function booleanField(field: string): FieldSpec {
   }
 }
 
+export function stringField(field: string): FieldSpec {
+  return {
+    field,
+    format: value => typeof value === 'string' ? value : '',
+    parse: text => ({ kind: 'set', value: text }),
+  }
+}
+
 export class CardForm<T> {
   private readonly specs: Map<string, FieldSpec>
   private readonly staged = new Map<string, StagedEdit>()

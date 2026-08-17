@@ -20,6 +20,13 @@
 - Key 专属视觉切换
 - 复杂 sequence 编排
 
+## 后续阶段
+
+当前文档聚焦 MVP 接入与调试。如果要继续推进 `v2` 之后的正式模型阶段，请继续阅读：
+
+- `docs/live2d-official-model-checklist.md`：正式模型落地清单
+- `docs/live2d-official-model-next-steps.md`：下一步实施 TODO
+
 ## 如何配置模型
 
 在 profile 的 patch 里，为 `@aimercat/dsh-aris` 增加配置，例如：
@@ -55,7 +62,8 @@ Copy-Item "<repo-path>\packages\dsh-aris\preset\aris" "$env:USERPROFILE\.dsh\.ag
 
 1. 以 `aris` / `aris-dev` preset 开一个新会话
 2. 确认该 profile 中 `@aimercat/dsh-aris` 的 `live2dEnabled` 已开启
-3. 确认 `live2dModelBase` 指向有效的 Cubism 3/4 `model3.json` 文件
+3. 若设置页中的 Live2D 总开关被关闭，先重新打开；关闭时模型和折叠 launcher 都不会出现
+4. 确认 `live2dModelBase` 指向有效的 Cubism 3/4 `model3.json` 文件
 4. 确认 `live2dCubismCoreUrl` 可访问（默认会自动加载官方 Cubism Core）
 5. 打开会话后，应出现右下角 Live2D overlay
 5. 会话开始时会触发一次 `greeting` 语义动作
@@ -100,6 +108,7 @@ Copy-Item "<repo-path>\packages\dsh-aris\preset\aris" "$env:USERPROFILE\.dsh\.ag
 
 ## 已知限制
 
+- 若 `live2dEnabled` 关闭，Live2D overlay、折叠 launcher 与 `aris_avatar_control` 的实际效果都会一起停用
 - 若 `live2dModelBase` 未配置或失效，`aris_avatar_control` 会降级为 `noop`
 - 当前实现仅支持 Cubism 3/4 模型；Cubism 2.1 的 `model.json` 线不在 MVP 范围内
 - 动作组 / 表情名取决于具体模型资源，当前默认语义映射只做了最保守的尝试

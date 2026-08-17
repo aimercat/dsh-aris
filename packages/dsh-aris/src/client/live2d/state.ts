@@ -3,8 +3,8 @@ import type { ArisAvatarAnchor } from '../../live2d/types.ts'
 export const STORAGE_KEY = 'dsh-aris-live2d-state-v2'
 export const STAGE_WIDTH = 320
 export const STAGE_HEIGHT = 420
-export const HIDDEN_WIDTH = 34
-export const HIDDEN_HEIGHT = 34
+export const HIDDEN_WIDTH = 44
+export const HIDDEN_HEIGHT = 44
 export const VIEWPORT_PADDING = 12
 
 export interface Live2DStateDefaults {

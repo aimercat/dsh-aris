@@ -10,15 +10,19 @@ import { COLLAPSED_AVATAR_URL } from './live2d/collapsed-avatar.ts'
 export const STYLE_TAG_ID = 'aris-think-css'
 export const SECTION_ATTR = 'data-aris-sectionized'
 export const SECTION_CLASS = 'aris-think-section'
+/** Scope attribute set on <body> only while the active session is an Aris one. */
+export const ACTIVE_ATTR = 'data-aris-active'
 
 export const CSS = `
 /* -- title: "Think" -> "爱丽丝的思考回路" ----------------------------- */
-[data-variant="think"] [class*="title"] {
+/* Scoped under [data-aris-active]: the style tag is injected globally, so a
+   non-Aris session (standard mode) must keep its stock thinking rendering. */
+[${ACTIVE_ATTR}] [data-variant="think"] [class*="title"] {
   visibility: hidden;
   position: relative;
   min-width: 8.5em;
 }
-[data-variant="think"] [class*="title"]::after {
+[${ACTIVE_ATTR}] [data-variant="think"] [class*="title"]::after {
   content: '爱丽丝的思考回路';
   visibility: visible;
   position: absolute;
@@ -32,7 +36,7 @@ export const CSS = `
 }
 
 /* -- typewriter caret on the streaming summary --------------------------- */
-[data-variant="think"][data-state="running"] [class*="summary"]::after {
+[${ACTIVE_ATTR}] [data-variant="think"][data-state="running"] [class*="summary"]::after {
   content: '▍';
   margin-left: 2px;
   color: #4a9eff;
@@ -43,12 +47,12 @@ export const CSS = `
 }
 
 /* -- sectionized (folded) thinking body --------------------------------- */
-.${SECTION_CLASS} {
+[${ACTIVE_ATTR}] .${SECTION_CLASS} {
   margin: 4px 0;
   border-radius: 8px;
   background: rgba(74, 158, 255, 0.06);
 }
-.${SECTION_CLASS} > summary {
+[${ACTIVE_ATTR}] .${SECTION_CLASS} > summary {
   cursor: pointer;
   list-style: none;
   display: flex;
@@ -59,23 +63,23 @@ export const CSS = `
   color: #4a9eff;
   user-select: none;
 }
-.${SECTION_CLASS} > summary::-webkit-details-marker {
+[${ACTIVE_ATTR}] .${SECTION_CLASS} > summary::-webkit-details-marker {
   display: none;
 }
-.${SECTION_CLASS} > summary::before {
+[${ACTIVE_ATTR}] .${SECTION_CLASS} > summary::before {
   content: '▸';
   transition: transform 0.15s ease;
   font-size: 10px;
 }
-.${SECTION_CLASS}[open] > summary::before {
+[${ACTIVE_ATTR}] .${SECTION_CLASS}[open] > summary::before {
   transform: rotate(90deg);
 }
-.${SECTION_CLASS}-label {
+[${ACTIVE_ATTR}] .${SECTION_CLASS}-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.${SECTION_CLASS}-body {
+[${ACTIVE_ATTR}] .${SECTION_CLASS}-body {
   padding: 2px 12px 10px;
   white-space: pre-wrap;
 }
@@ -170,7 +174,7 @@ export const CSS = `
   border-radius: 999px;
   border: 1px solid rgba(130, 205, 255, 0.72);
   background-color: #eef9ff;
-  background-image: ${COLLAPSED_AVATAR_URL};
+  background-image: var(--aris-live2d-collapsed-avatar, ${COLLAPSED_AVATAR_URL});
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -388,7 +392,8 @@ export const CSS = `
 .aris-settings-card__action--primary:focus-visible,
 .aris-settings-card__action:focus-visible,
 .aris-settings-card__reset:focus-visible,
-.aris-settings-card__boolean:focus-visible {
+.aris-settings-card__boolean:focus-visible,
+.aris-settings-card__textarea:focus-visible {
   outline: 2px solid var(--dsw-alias-brand-primary);
   outline-offset: 1px;
 }
@@ -416,6 +421,30 @@ export const CSS = `
   border-color: var(--dsw-alias-brand-primary);
   background: color-mix(in srgb, var(--dsw-alias-brand-primary) 12%, transparent);
   color: var(--dsw-alias-label-primary);
+}
+.aris-settings-card__textarea {
+  width: 100%;
+  min-height: 108px;
+  padding: 10px 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 10px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.aris-settings-card__textarea::placeholder {
+  color: var(--dsw-alias-label-quaternary);
+}
+.aris-settings-card__textarea.is-invalid {
+  border-color: #ff9a74;
+}
+.aris-settings-card__textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .aris-settings-card__footer {
   display: flex;

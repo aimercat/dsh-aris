@@ -96,6 +96,7 @@ export const Config = Schema.object({
 
 function currentSettingsFromConfig(config: Readonly<Config>): ArisLive2DSettingsSection {
   return {
+    enabled: config.live2dEnabled,
     muted: config.live2dMuted,
     allowMotionSound: config.live2dAllowMotionSound,
     defaultHidden: config.live2dDefaultHidden,
@@ -108,6 +109,7 @@ export function apply(ctx: Context, config: Config): void {
 
   const currentConfig = (): Config => ({
     ...config,
+    live2dEnabled: currentSettings().enabled,
     live2dMuted: currentSettings().muted,
     live2dAllowMotionSound: currentSettings().allowMotionSound,
     live2dDefaultHidden: currentSettings().defaultHidden,

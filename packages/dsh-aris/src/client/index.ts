@@ -15,7 +15,7 @@ import { createArisThinkEnhancer } from './aris-think.ts'
 import { installBravePermissionIcon } from './brave-icon.ts'
 import { registerArisLive2DSettingsCard } from './live2d-settings/index.ts'
 import { createLive2DBridge } from './live2d/bridge.ts'
-import { CSS, STYLE_TAG_ID } from './styles.ts'
+import { CSS, STYLE_TAG_ID, ACTIVE_ATTR } from './styles.ts'
 
 function sessionList(ctx: ClientContext): ObservableSnapshot<SessionListState> {
   return ctx.sessions.list as unknown as ObservableSnapshot<SessionListState>
@@ -50,15 +50,21 @@ export function apply(ctx: ClientContext): void {
     }
     enabled = next
     if (enabled) {
+      // Arm the scoped styles: the <style> tag is injected globally (it must
+      // survive session switches), but the Aris think/live2d rules only apply
+      // under this body attribute, so non-Aris sessions keep stock rendering.
+      document.body.setAttribute(ACTIVE_ATTR, '')
       try {
         enhancer.start()
         live2d.sync(true)
       } catch (error) {
         console.warn('[dsh-aris] enhancer start failed:', error)
         live2d.stop()
+        document.body.removeAttribute(ACTIVE_ATTR)
         enabled = false
       }
     } else {
+      document.body.removeAttribute(ACTIVE_ATTR)
       live2d.stop()
       enhancer.stop()
     }

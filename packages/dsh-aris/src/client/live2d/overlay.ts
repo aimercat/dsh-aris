@@ -15,6 +15,7 @@ export interface Live2DOverlay {
   readonly toggle: HTMLButtonElement
   readonly reset: HTMLButtonElement
   setState(state: Live2DLocalState): void
+  setCollapsedAvatarUrl(url: string): void
   setBubble(text: string | null, tone: string | undefined): void
   destroy(): void
 }
@@ -64,8 +65,8 @@ export function createOverlay(
   let dragStartX = 0
   let dragStartY = 0
   let dragMoved = false
+  let gestureFromCollapsedToggle = false
   let suppressToggleClick = false
-  let dragFromCollapsedToggle = false
 
   const DRAG_START_THRESHOLD = 4
 
@@ -90,10 +91,23 @@ export function createOverlay(
 
   const finishDrag = (): void => {
     if (!dragging) return
+    const moved = dragMoved
+    const fromCollapsedToggle = gestureFromCollapsedToggle
     dragging = false
-    if (dragMoved) commit()
     dragMoved = false
-    dragFromCollapsedToggle = false
+    gestureFromCollapsedToggle = false
+
+    if (fromCollapsedToggle && !moved) {
+      suppressToggleClick = true
+      state.hidden = false
+      commit()
+      return
+    }
+
+    if (moved) {
+      if (fromCollapsedToggle) suppressToggleClick = true
+      commit()
+    }
   }
 
   const onToggleClick = (event: MouseEvent): void => {
@@ -124,7 +138,7 @@ export function createOverlay(
     dragStartX = event.clientX
     dragStartY = event.clientY
     dragMoved = false
-    dragFromCollapsedToggle = onCollapsedToggle
+    gestureFromCollapsedToggle = onCollapsedToggle
     root.setPointerCapture(event.pointerId)
   }
 
@@ -135,7 +149,6 @@ export function createOverlay(
     if (!dragMoved) {
       if (Math.hypot(deltaX, deltaY) < DRAG_START_THRESHOLD) return
       dragMoved = true
-      if (dragFromCollapsedToggle) suppressToggleClick = true
     }
     state = normalizeState({
       ...state,
@@ -191,6 +204,9 @@ export function createOverlay(
         hidden: next.hidden,
       })
       apply()
+    },
+    setCollapsedAvatarUrl(url) {
+      root.style.setProperty('--aris-live2d-collapsed-avatar', url)
     },
     setBubble(text, tone) {
       if (text === null) {

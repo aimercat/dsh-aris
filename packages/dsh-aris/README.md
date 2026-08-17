@@ -112,7 +112,7 @@ preset 内联承载，可独立演进。勇者权限由同一包的子路径
 
 | 键 | 默认 | 说明 |
 | --- | --- | --- |
-| `live2dEnabled` | `false` | 是否启用爱丽丝 Live2D 层 |
+| `live2dEnabled` | `false` | 是否启用爱丽丝 Live2D 总开关；关闭后连折叠 launcher 也不会出现 |
 | `live2dModelBase` | `""` | Live2D 模型设置文件路径（例如 `model3.json`） |
 | `live2dAnchor` | `bottom-right` | 初始停靠角 |
 | `live2dCubismCoreUrl` | `https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js` | Cubism 3/4 Core 脚本地址 |
@@ -132,6 +132,14 @@ preset 内联承载，可独立演进。勇者权限由同一包的子路径
 - 基础自动表演：开场、思考、完成、错误
 
 详细接入与调试说明见 `../../docs/live2d-mvp-setup.md`。
+
+相关 Live2D 文档：
+
+- `../../docs/live2d-control-bridge.md`：会话内控制桥设计
+- `../../docs/live2d-personal-first-roadmap.md`：个人优先路线图
+- `../../docs/live2d-official-model-checklist.md`：`v2` 之后的正式模型落地清单
+- `../../docs/live2d-official-model-next-steps.md`：正式模型阶段的下一步实施 TODO
+- `../../docs/live2d-official-model-source-decision.md`：正式模型来源与授权决策
 
 ## 开发
 

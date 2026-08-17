@@ -4,12 +4,14 @@ import type { SnapshotStore } from '@deepseek-ai/dsh-client-runtime/client'
 import { CardForm, booleanField, type CardActions, type CardFieldState, type CardShell } from './card-form.ts'
 
 export interface ArisLive2DSettings {
+  enabled?: boolean
   muted?: boolean
   allowMotionSound?: boolean
   defaultHidden?: boolean
 }
 
 export interface ArisLive2DSettingsCardState extends CardShell {
+  enabled: CardFieldState
   muted: CardFieldState
   allowMotionSound: CardFieldState
   defaultHidden: CardFieldState
@@ -37,6 +39,7 @@ export class ArisLive2DSettingsCardController {
 
   constructor(scope: import('@deepseek-ai/dsh-client-runtime/client').SettingsScope<ArisLive2DSettings>) {
     this.form = new CardForm(scope, [
+      booleanField('enabled'),
       booleanField('muted'),
       booleanField('allowMotionSound'),
       booleanField('defaultHidden'),
@@ -47,6 +50,7 @@ export class ArisLive2DSettingsCardController {
   private projection(): ArisLive2DSettingsCardState {
     return {
       ...this.form.shell(),
+      enabled: this.form.field('enabled'),
       muted: this.form.field('muted'),
       allowMotionSound: this.form.field('allowMotionSound'),
       defaultHidden: this.form.field('defaultHidden'),
@@ -69,6 +73,7 @@ export function ArisLive2DSettingsCard(props: ArisLive2DSettingsCardProps) {
   const [live2dOpen, setLive2dOpen] = useState(true)
   const state = props.useArisLive2DSettingsCard(snapshot => snapshot)
   const blocked = !state.dirty || state.invalid || state.saving
+  const live2dEnabled = state.enabled.text === 'true'
 
   return (
     <li className={`aris-settings-card${open ? ' is-open' : ''}`}>
@@ -109,6 +114,20 @@ export function ArisLive2DSettingsCard(props: ArisLive2DSettingsCardProps) {
                   <>
                     {!state.writable ? <p className="aris-settings-card__notice">{t('plugin.readOnly')}</p> : null}
                     <BooleanField
+                      id="settings-aris-enabled"
+                      label={t('live2d.enabled')}
+                      hint={t('live2d.enabledHint')}
+                      inheritLabel={t('plugin.inherit')}
+                      onLabel={t('plugin.on')}
+                      offLabel={t('plugin.off')}
+                      overriddenLabel={t('plugin.overridden')}
+                      resetLabel={t('plugin.reset')}
+                      disabled={!state.writable}
+                      {...state.enabled}
+                      onEdit={(text) => { props.edit('enabled', text) }}
+                      onReset={() => { props.resetField('enabled') }}
+                    />
+                    <BooleanField
                       id="settings-aris-muted"
                       label={t('live2d.muted')}
                       hint={t('live2d.mutedHint')}
@@ -117,7 +136,7 @@ export function ArisLive2DSettingsCard(props: ArisLive2DSettingsCardProps) {
                       offLabel={t('plugin.off')}
                       overriddenLabel={t('plugin.overridden')}
                       resetLabel={t('plugin.reset')}
-                      disabled={!state.writable}
+                      disabled={!state.writable || !live2dEnabled}
                       {...state.muted}
                       onEdit={(text) => { props.edit('muted', text) }}
                       onReset={() => { props.resetField('muted') }}
@@ -131,7 +150,7 @@ export function ArisLive2DSettingsCard(props: ArisLive2DSettingsCardProps) {
                       offLabel={t('plugin.off')}
                       overriddenLabel={t('plugin.overridden')}
                       resetLabel={t('plugin.reset')}
-                      disabled={!state.writable}
+                      disabled={!state.writable || !live2dEnabled}
                       {...state.allowMotionSound}
                       onEdit={(text) => { props.edit('allowMotionSound', text) }}
                       onReset={() => { props.resetField('allowMotionSound') }}
@@ -145,7 +164,7 @@ export function ArisLive2DSettingsCard(props: ArisLive2DSettingsCardProps) {
                       offLabel={t('plugin.off')}
                       overriddenLabel={t('plugin.overridden')}
                       resetLabel={t('plugin.reset')}
-                      disabled={!state.writable}
+                      disabled={!state.writable || !live2dEnabled}
                       {...state.defaultHidden}
                       onEdit={(text) => { props.edit('defaultHidden', text) }}
                       onReset={() => { props.resetField('defaultHidden') }}
@@ -223,3 +242,4 @@ function BooleanField(props: BooleanFieldProps) {
     </div>
   )
 }
+
