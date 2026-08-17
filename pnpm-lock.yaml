@@ -84,6 +84,9 @@ importers:
       '@aimercat/dsh-aris-settings':
         specifier: workspace:*
         version: link:../dsh-aris-settings
+      '@aimercat/dsh-session-guard':
+        specifier: workspace:*
+        version: link:../dsh-session-guard
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: ^4.0.1
