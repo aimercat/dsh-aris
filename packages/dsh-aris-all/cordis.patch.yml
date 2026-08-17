@@ -30,3 +30,8 @@
 - insert:
     - id: aris-settings
       name: '@aimercat/dsh-aris-settings'
+
+# from ../dsh-session-guard
+- insert:
+    - id: session-guard
+      name: '@aimercat/dsh-session-guard'

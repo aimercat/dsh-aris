@@ -1,0 +1,8 @@
+# @aimercat/dsh-session-guard — 上下文守卫（爱丽丝全家桶）
+#
+# 挂载 host half：输出续写守卫（max-tokens 截断自动续写）、提前压缩哨兵
+# （早于宿主的 80% 阈值在 70% 主动压缩）、熔断器与失败存档。
+# 覆盖本行 config 即可调参（键见 src/config.ts 白名单）。
+- insert:
+    - id: session-guard
+      name: '@aimercat/dsh-session-guard'

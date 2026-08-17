@@ -21,7 +21,9 @@
 patchFrom:
   - ../dsh-aris
   - ../dsh-aris-settings
+  - ../dsh-session-guard
 deps:
   - ../dsh-aris
   - ../dsh-aris-settings
+  - ../dsh-session-guard
 
