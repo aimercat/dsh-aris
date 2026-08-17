@@ -32,9 +32,14 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     /**
      * The Aris family child slot declared by @aimercat/dsh-aris-settings.
      * Declaration-aware: standalone installs (no family group) keep the card
-     * silently absent instead of throwing.
+     * in the top-level slot instead.
      */
     'aris.plugin.item': { kind: 'list'; scope: 'root'; owner: SettingsPluginItemOwnerProps }
+    /**
+     * The plugin configuration section's card seat, declared by
+     * ui-plugin-config. Used as the standalone-install fallback seat.
+     */
+    'settings.plugin.item': { kind: 'list'; scope: 'root'; owner: SettingsPluginItemOwnerProps }
   }
 }
 
