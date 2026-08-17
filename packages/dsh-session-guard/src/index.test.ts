@@ -129,7 +129,7 @@ describe('apply', () => {
   })
 
   it('writes a failure checkpoint when overflow reaches the user', async () => {
-    const { mkdtempSync, rmSync } = await import('node:fs')
+    const { mkdtempSync, rmSync, readdirSync, readFileSync, existsSync } = await import('node:fs')
     const { tmpdir } = await import('node:os')
     const { join } = await import('node:path')
     const tmpDir = mkdtempSync(join(tmpdir(), 'dsh-session-guard-test-'))
@@ -142,9 +142,14 @@ describe('apply', () => {
         kind: 'error',
         error: { code: 'CONTEXT_WINDOW_EXCEEDED', message: 'This model maximum context length is 131072 tokens' },
       })
-      const files = (await import('node:fs')).readdirSync(join(tmpDir, 'checkpoints'))
-      expect(files).toContain('s1-turn-1.md')
-      const body = (await import('node:fs')).readFileSync(join(tmpDir, 'checkpoints', 's1-turn-1.md'), 'utf8')
+      // The archive write is fire-and-forget; poll briefly for the file.
+      const checkpointDir = join(tmpDir, 'checkpoints')
+      const target = join(checkpointDir, 's1-turn-1.md')
+      for (let wait = 0; wait < 50 && !existsSync(target); wait += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 20))
+      }
+      expect(readdirSync(checkpointDir)).toContain('s1-turn-1.md')
+      const body = readFileSync(target, 'utf8')
       expect(body).toContain('# 会话存档（上下文溢出）')
       expect(body).toContain('- [user] hello world')
     } finally {

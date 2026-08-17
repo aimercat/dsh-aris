@@ -11,7 +11,7 @@
  */
 
 import { mkdir, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { resolve } from 'node:path'
 import type { CheckpointConfig, GuardSessionLike } from './types.ts'
 
 /** How many trailing messages the checkpoint previews. */
@@ -49,7 +49,8 @@ export async function writeFailureCheckpoint(
   workspaceRoot = process.cwd(),
 ): Promise<string | null> {
   if (!config.enabled) return null
-  const dir = join(workspaceRoot, config.dir, 'checkpoints')
+  // resolve() (not join) so an absolute configured dir overrides the root.
+  const dir = resolve(workspaceRoot, config.dir, 'checkpoints')
   await mkdir(dir, { recursive: true })
   const messages = (session.deriveMessages?.() ?? []) as Array<{ role?: string; content?: readonly { type?: string; text?: string }[] }>
   const previews = messages.slice(-PREVIEW_MESSAGE_COUNT).map(previewMessage)
@@ -70,7 +71,7 @@ export async function writeFailureCheckpoint(
     '- 使用上面的会话信息继续任务；若需要完整历史，从会话日志恢复。',
     '',
   ].join('\n')
-  const file = join(dir, `${sanitize(session.id)}-turn-${turn}.md`)
+  const file = resolve(dir, `${sanitize(session.id)}-turn-${turn}.md`)
   await writeFile(file, body, 'utf8')
   return file
 }
