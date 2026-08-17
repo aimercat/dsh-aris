@@ -1,0 +1,53 @@
+{
+  "name": "@aimercat/dsh-aris-all",
+  "description": "Aris family aggregate plugin: one install brings @aimercat/dsh-aris, the Aris family settings group card (@aimercat/dsh-aris-settings), and the workspace-memory plugin (@aimercat/dsh-memory, preset-gated) together.",
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "scripts": {
+    "build": "tsc -b && tsdown",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -b --pretty false",
+    "prepare": "tsdown"
+  },
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts",
+    "src",
+    "cordis.patch.yml",
+    "aggregate.yml"
+  ],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@types/node": "^22.20.0",
+    "tsdown": "^0.22.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aimercat/dsh-aris.git"
+  },
+  "dependencies": {
+    "@aimercat/dsh-aris": "workspace:*",
+    "@aimercat/dsh-aris-settings": "workspace:*"
+  }
+}

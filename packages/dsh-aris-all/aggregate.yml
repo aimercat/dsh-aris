@@ -1,0 +1,20 @@
+# 聚合包清单：patchFrom 的包其 cordis.patch.yml 顶层块会被汇总进本包 patch
+# （insert 行 + permission 等 config 块都原样保留）；deps 的包进 package.json
+# dependencies（workspace:*），DSH loader 从 profile 顶层解析 patch 行，
+# 子包依赖需 hoisted（aris-dev profile 已配 nodeLinker: hoisted）。
+#
+# 关键决策：dsh-memory 只进 deps 不进 patchFrom！
+# 聚合 patch 行由 profile 顶层（host 平面）解析；若含 dsh-memory 行等于
+# 全局挂载，违背「dsh-memory preset 级开启」决策。作为 dependencies 安装
+# 后，preset/aris 的 agent 平面仍能解析 @aimercat/dsh-memory，按需启用。
+#
+# self 暂不启用（无 compat shim 需求）；未来 Live2D 重依赖或 client 补丁
+# 需要随聚合包加载时再启用。
+patchFrom:
+  - ../dsh-aris
+  - ../dsh-aris-settings
+deps:
+  - ../dsh-aris
+  - ../dsh-aris-settings
+  # dsh-memory 迁入本仓库（路线图③）后取消注释：
+  # - ../dsh-memory

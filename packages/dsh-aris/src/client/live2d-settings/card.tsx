@@ -29,7 +29,12 @@ export interface SettingsPluginItemOwnerProps {
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap {
-    'settings.plugin.item': { kind: 'list'; scope: 'root'; owner: SettingsPluginItemOwnerProps }
+    /**
+     * The Aris family child slot declared by @aimercat/dsh-aris-settings.
+     * Declaration-aware: standalone installs (no family group) keep the card
+     * silently absent instead of throwing.
+     */
+    'aris.plugin.item': { kind: 'list'; scope: 'root'; owner: SettingsPluginItemOwnerProps }
   }
 }
 
@@ -63,7 +68,7 @@ export class ArisLive2DSettingsCardController {
 }
 
 export type ArisLive2DSettingsCardProps =
-  PropsRuntime<'settings.plugin.item'>
+  PropsRuntime<'aris.plugin.item'>
   & PropsLocale<'aris-settings'>
   & InjectFace<ArisLive2DSettingsCardFace>
 

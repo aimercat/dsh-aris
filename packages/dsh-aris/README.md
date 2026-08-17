@@ -22,8 +22,10 @@
 ## 安装
 
 ```bash
-# 本包现在位于 workspace 子目录 packages/dsh-aris
-# 作为插件装入 profile（<repo-path> 替换为本仓库根路径）
+# 推荐：聚合包一次装齐（本插件 + 设置组卡 + 设置桥）
+dsh plugin --profile <name> add link:<repo-path>\packages\dsh-aris-all
+
+# 或单独安装本包（<repo-path> 替换为本仓库根路径）
 dsh plugin --profile <name> add link:<repo-path>\packages\dsh-aris
 
 # 用 preset「勇者爱丽丝」
@@ -33,6 +35,11 @@ Copy-Item "<repo-path>\packages\dsh-aris\preset\aris" "$env:USERPROFILE\.dsh\.ag
 ```
 
 依赖：`@aimercat/dsh-memory`（工作区记忆，需同时安装）。
+
+> **设置卡位置**：Live2D 等设置卡注入 `aris.plugin.item` 子槽位，由
+> `@aimercat/dsh-aris-settings` 的「爱丽丝全家桶」组卡承载。单独安装本包
+> （无组卡宿主）时设置卡静默不显示（slots 声明感知），配置仍可通过 profile
+> 的 `cordis.patch.yml` 写入；推荐与聚合包或 `dsh-aris-settings` 一起安装。
 
 ## 架构
 

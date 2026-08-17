@@ -1,0 +1,9 @@
+# @aimercat/dsh-aris-settings — group card + settings bridge for the dsh-aris
+# family plugin(s). Install it into a dsh profile
+# (`dsh plugin --profile <name> add link:...`), or prefer the aggregate
+# package `@aimercat/dsh-aris-all` which brings this group card,
+# `@aimercat/dsh-aris`, and the memory plugin together.
+
+- insert:
+    - id: aris-settings
+      name: '@aimercat/dsh-aris-settings'
