@@ -59,6 +59,9 @@ function report(msg) {
 /** Family packages publish under this scope; everything else under packages/ is not ours to link. */
 const FAMILY_SCOPE = '@aimercat/'
 
+/** Optional external-link manifest (git-ignored): {"@scope/name": "absolute dir"}. */
+const EXTERNAL_LINKS_FILE = '.dsh-external-links.json'
+
 /** Every family package: packages/* that has a package.json with a name. */
 function familyPackages() {
   const found = []
@@ -76,6 +79,44 @@ function familyPackages() {
   return found
 }
 
+/**
+ * External family links from the git-ignored manifest (keeps local absolute
+ * paths out of the repository). Each entry names the full package
+ * ("@scope/name") and the absolute source dir; the link name drops the scope
+ * prefix so the link lands in the global @scope layer next to the in-repo
+ * packages. Returns [] when the manifest is absent or unreadable.
+ * @param repoRoot - repository root (injectable for tests).
+ */
+export function externalPackages(repoRoot = REPO_ROOT) {
+  const manifestPath = join(repoRoot, EXTERNAL_LINKS_FILE)
+  if (!existsSync(manifestPath)) return []
+  let manifest
+  try {
+    manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+  } catch (error) {
+    report(`cannot read ${EXTERNAL_LINKS_FILE}: ${error.message}; skipping external links`)
+    return []
+  }
+  const found = []
+  for (const [fullName, dir] of Object.entries(manifest)) {
+    if (typeof dir !== 'string' || dir.trim() === '') {
+      report(`skipping external link '${fullName}' (invalid target)`)
+      continue
+    }
+    if (!fullName.startsWith(FAMILY_SCOPE)) {
+      report(`skipping external link '${fullName}' (must start with ${FAMILY_SCOPE})`)
+      continue
+    }
+    const abs = resolvePath(dir)
+    if (!existsSync(abs)) {
+      report(`skipping external link '${fullName}' (target missing: ${abs})`)
+      continue
+    }
+    found.push({ name: fullName.slice(FAMILY_SCOPE.length), dir: abs })
+  }
+  return found
+}
+
 function main() {
   const DRY = process.argv.includes('--dry-run')
 
@@ -87,8 +128,10 @@ function main() {
   const PROFILES_NM = join(HOME, '.dsh', 'profiles', 'node_modules')
   const LINK_DIR = join(PROFILES_NM, FAMILY_SCOPE)
 
-  const packages = familyPackages()
-  report(`found ${packages.length} family package(s) under packages/`)
+  const family = familyPackages()
+  const external = externalPackages()
+  const packages = [...family, ...external]
+  report(`found ${packages.length} family package(s) (${family.length} in-repo, ${external.length} external)`)
   if (DRY) report('--dry-run: no changes will be made')
 
   if (!existsSync(LINK_DIR)) {

@@ -6,7 +6,10 @@
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { decideLinkAction } from './link-profile.mjs'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { decideLinkAction, externalPackages } from './link-profile.mjs'
 
 test('missing entry creates a link', () => {
   assert.equal(decideLinkAction('missing', 'packages/dsh-aris', null), 'create')
@@ -23,4 +26,30 @@ test('stale symlink is replaced', () => {
 test('real file or directory is never unlinked', () => {
   assert.equal(decideLinkAction('dir', 'packages/dsh-aris', null), 'skip-report')
   assert.equal(decideLinkAction('file', 'packages/dsh-aris', null), 'skip-report')
+})
+
+test('externalPackages reads the manifest and strips the scope prefix', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'aris-lp-'))
+  const target = join(dir, 'dsh_memory_support')
+  mkdirSync(target, { recursive: true })
+  writeFileSync(join(dir, '.dsh-external-links.json'), JSON.stringify({
+    '@aimercat/dsh-memory': target,
+    'bad-entry': target,
+    '@aimercat/missing': join(dir, 'nope'),
+  }))
+  try {
+    const found = externalPackages(dir)
+    assert.deepEqual(found, [{ name: 'dsh-memory', dir: target }])
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('externalPackages returns [] without a manifest', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'aris-lp-'))
+  try {
+    assert.deepEqual(externalPackages(dir), [])
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
 })

@@ -8,6 +8,14 @@
 # 全局挂载，违背「dsh-memory preset 级开启」决策。作为 dependencies 安装
 # 后，preset/aris 的 agent 平面仍能解析 @aimercat/dsh-memory，按需启用。
 #
+# dsh-memory 采用「外链」策略（2026-08-18 老师拍板）：保持独立仓库
+# dsh_memory_support（独立 master/dev 隔离与验证），聚合包不写
+# link:G:/... 绝对路径（隐私），也不写 workspace:*（仓库内无此包）——
+# dependencies 里不声明 dsh-memory，解析靠 profile/全局层链接
+# （scripts/link-profile.mjs 的 .dsh-external-links.json 外部链接清单，
+# 该文件 git-ignored）。未来 dsh-memory 发布 npm 后，在此手写
+# "@aimercat/dsh-memory": "^x.y.z"（aggregate.mjs 会保留非清单手写项）。
+#
 # self 暂不启用（无 compat shim 需求）；未来 Live2D 重依赖或 client 补丁
 # 需要随聚合包加载时再启用。
 patchFrom:
@@ -16,5 +24,4 @@ patchFrom:
 deps:
   - ../dsh-aris
   - ../dsh-aris-settings
-  # dsh-memory 迁入本仓库（路线图③）后取消注释：
-  # - ../dsh-memory
+

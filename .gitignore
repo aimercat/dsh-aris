@@ -5,3 +5,5 @@ node_modules/
 dist/
 .npm-cache/
 .dsh/
+# 外部链接清单（本地绝对路径，不提交）
+.dsh-external-links.json
