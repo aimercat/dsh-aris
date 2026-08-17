@@ -23,7 +23,7 @@ function sessionList(ctx: ClientContext): ObservableSnapshot<SessionListState> {
 
 const ARIS_PRESET_IDS = new Set(['aris', 'aris-dev'])
 
-export const inject = ['sessions', 'slots', 'locale', 'connection', 'settingsScope', 'remote', 'webUiSettings']
+export const inject = ['sessions', 'slots', 'locale', 'connection', 'remote']
 
 export function apply(ctx: ClientContext): void {
   let styleTag: HTMLStyleElement | undefined = injectStyle()

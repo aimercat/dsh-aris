@@ -23,8 +23,11 @@ function sessionList(ctx: ClientContext): ObservableSnapshot<{ current: SessionI
 }
 
 export function createLive2DBridge(ctx: ClientContext): { sync: (enabled: boolean) => void; stop: () => void } {
-  const binder = ctx.webUiSettings ?? ctx.settingsScope
-  const live2dSettings = binder.bind<Live2DSettingsSection>({ namespace: LIVE2D_SETTINGS_NAMESPACE })
+  const binder = ctx.get('webUiSettings') ?? ctx.get('settingsScope')
+  const live2dSettings = binder?.bind<Live2DSettingsSection>({ namespace: LIVE2D_SETTINGS_NAMESPACE }) ?? {
+    getSnapshot: () => ({ status: 'pending' as const }),
+    subscribe: () => (() => {}),
+  }
 
   let active = false
   let currentSessionId: SessionId | undefined

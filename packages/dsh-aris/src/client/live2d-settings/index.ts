@@ -25,7 +25,8 @@ export function registerArisLive2DSettingsCard(ctx: ClientContext): void {
   // Prefer the Aris family binder (bridge fallback), then the dsh-web-ui
   // family's, then the official scope. Standalone installs without any
   // binder keep the card read-only instead of crashing.
-  const binder = ctx.arisSettings ?? ctx.webUiSettings ?? ctx.settingsScope
+  const binder = ctx.get('arisSettings') ?? ctx.get('webUiSettings') ?? ctx.get('settingsScope')
+  if (binder === undefined) return
   const settingsScope = binder.bind<ArisLive2DSettings>({ namespace: SETTINGS_NAMESPACE })
   const card = new ArisLive2DSettingsCardController(settingsScope)
 
