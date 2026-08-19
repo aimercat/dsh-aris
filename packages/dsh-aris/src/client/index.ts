@@ -15,13 +15,10 @@ import { createArisThinkEnhancer } from './aris-think.ts'
 import { installBravePermissionIcon } from './brave-icon.ts'
 import { registerArisLive2DSettingsCard } from './live2d-settings/index.ts'
 import { createLive2DBridge } from './live2d/bridge.ts'
+import { isArisSession, sessionList } from './preset.ts'
+import { PromptNavController } from './prompt-nav/index.ts'
+import { registerPromptNavToggle } from './prompt-nav/toggle.tsx'
 import { CSS, STYLE_TAG_ID, ACTIVE_ATTR } from './styles.ts'
-
-function sessionList(ctx: ClientContext): ObservableSnapshot<SessionListState> {
-  return ctx.sessions.list as unknown as ObservableSnapshot<SessionListState>
-}
-
-const ARIS_PRESET_IDS = new Set(['aris', 'aris-dev'])
 
 export const inject = ['sessions', 'slots', 'locale', 'connection', 'remote']
 
@@ -38,6 +35,9 @@ export function apply(ctx: ClientContext): void {
 
   const enhancer = createArisThinkEnhancer()
   const live2d = createLive2DBridge(ctx)
+  const promptNav = new PromptNavController(ctx)
+  promptNav.attach()
+  const disposePromptNavToggle = registerPromptNavToggle(ctx, promptNav)
   let enabled = false
 
   const disposeBraveIcon = installBravePermissionIcon(document)
@@ -78,6 +78,8 @@ export function apply(ctx: ClientContext): void {
     return () => {
       dispose()
       disposeBraveIcon()
+      disposePromptNavToggle()
+      promptNav.dispose()
       live2d.stop()
       enhancer.stop()
       removeStyle(styleTag)
@@ -85,20 +87,6 @@ export function apply(ctx: ClientContext): void {
       enabled = false
     }
   }, 'dsh-aris: browser half')
-}
-
-function isArisSession(ctx: ClientContext): boolean {
-  try {
-    const snapshot = sessionList(ctx).getSnapshot()
-    const sessionId = snapshot.current as string | undefined
-    if (sessionId === undefined) return false
-    const byId = snapshot.byId as Record<string, { agentPreset?: string } | undefined>
-    const preset = byId[sessionId]?.agentPreset
-    return preset !== undefined && ARIS_PRESET_IDS.has(preset)
-  } catch (error) {
-    console.warn('[dsh-aris] preset gate read failed:', error)
-    return false
-  }
 }
 
 function injectStyle(): HTMLStyleElement {

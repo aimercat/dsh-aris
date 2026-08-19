@@ -7,3 +7,6 @@ dist/
 .dsh/
 # 外部链接清单（本地绝对路径，不提交）
 .dsh-external-links.json
+
+# 本地素材（裁剪源图等，不进仓库）
+assets-local/
